@@ -27,7 +27,7 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className = '' }) => {
   }
 
   const downloadTags = () => {
-    downloadCSV(images, tags, title, category);
+    downloadCSV(images, tags, title, true, category);
   };
 
   return (

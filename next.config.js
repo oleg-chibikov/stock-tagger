@@ -14,7 +14,7 @@ const nextConfig = {
 };
 
 const bootServices = async () => {
-  return fetch('http://localhost:3000/api/_boot')
+  return fetch('http://localhost:3000/api/boot')
     .then(async (res) => {
       const resJson = await res.json();
 

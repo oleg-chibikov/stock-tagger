@@ -1,3 +1,4 @@
+import { PROGRESS } from '@dataTransferTypes/event';
 import { UploadEvent, UploadOperation } from '@dataTransferTypes/upload';
 import { deleteFile, getFilesFromRequest } from '@services/helper';
 import { SftpService } from '@services/sftpService';

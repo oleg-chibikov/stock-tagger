@@ -5,6 +5,7 @@ declare module 'png-chunk-text' {
   }
 
   function decode(chunks: Buffer): PNGTextChunk;
+  const obj = { decode };
 
-  export default { decode };
+  export default obj;
 }

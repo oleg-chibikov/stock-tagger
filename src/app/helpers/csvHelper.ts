@@ -4,13 +4,14 @@ function createCSVData(
   images: ImageWithData[],
   tags: string[],
   title: string,
+  isAi: boolean,
   category?: number
 ): string {
   const csvSplitter = ',';
   const rows = images.map((image) => {
     return {
-      Filename: image.name,
-      Title: title,
+      Filename: `"${image.name}"`,
+      Title: `"${title}${isAi ? '. GenerativeAI' : ''}"`,
       Keywords: `"${tags.join(csvSplitter)}"`,
       Category: category?.toString(),
       Releases: '',
@@ -31,9 +32,10 @@ function downloadCSV(
   images: ImageWithData[],
   tags: string[],
   title: string,
+  isAi: boolean,
   category?: number
 ) {
-  const csvData = createCSVData(images, tags, title, category);
+  const csvData = createCSVData(images, tags, title, isAi, category);
 
   // Create a Blob from the CSV data
   const blob = new Blob([csvData], { type: 'text/csv' });

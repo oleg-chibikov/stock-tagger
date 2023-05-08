@@ -1,3 +1,4 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { CaptioningService } from '@services/captioningService';
 import { UpscalerService } from '@services/upscalerService';
 import EventEmitter from 'events';
@@ -8,7 +9,8 @@ import {
   createFolderIfNotExists,
   getCondaPath,
   runCommands,
-} from './services/helper';
+} from '@services/helper';
+
 
 const bootedServices = new Set();
 
@@ -124,4 +126,11 @@ const bootHandler = async () => {
   return Array.from(bootedServices);
 };
 
-export default bootHandler;
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const bootedServices = await bootHandler();
+
+  res.status(200).json({ bootedServices });
+}
