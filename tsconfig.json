@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -20,7 +22,14 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@services/*": ["./src/backend/services/*"],
+      "@pages/*": ["./pages/*"],
+      "@apiClient/*": ["./src/app/api/*"],
+      "@components/*": ["./src/app/components/*"],
+      "@store/*": ["./src/app/store/*"],
+      "@dataTransferTypes/*": ["./src/dataTransferTypes/*"],
+      "@appHelper/*": ["./src/app/helpers/*"],
+      "@constants/*": ["./src/app/constants/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

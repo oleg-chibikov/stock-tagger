@@ -25,3 +25,31 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+input, textarea, select, option {
+  color: rgb(var(--background-start-rgb));
+  background-color: rgb(var(--foreground-rgb));
+}
+/* Target the option elements inside the combobox */
+input[role="combobox"] option {
+  /* Add your desired styles for the options here */
+  background-color: #f2f2f2;
+  color: #333;
+}
+
+/* Style the marker for the selected option */
+input[role="combobox"] option:checked::before {
+  content: "✔";
+  margin-right: 5px;
+}
+
+/* Style the marker for the unselected options */
+input[role="combobox"] option::before {
+  content: "";
+  margin-right: 5px;
+}
+
+/* Style the arrow icon for the combobox */
+input[role="combobox"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
