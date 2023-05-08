@@ -8,7 +8,7 @@ interface TagProps {
   handleRemoveTag: (index: number) => void;
   hoveredIndex: number | undefined;
   setHoveredIndex: (index: number | undefined) => void;
-  isActive: boolean;
+  isHovered: boolean;
 }
 
 const Tag: FunctionComponent<TagProps> = ({
@@ -17,14 +17,14 @@ const Tag: FunctionComponent<TagProps> = ({
   handleRemoveTag,
   hoveredIndex,
   setHoveredIndex,
-  isActive,
+  isHovered,
 }) => {
   return (
     <div className="flex items-center cursor-pointer">
       <div
         className={clsx(
-          'flex-1 py-1 px-3',
-          isActive ? 'bg-sky-900' : 'bg-gray-500'
+          'flex-1 py-1 px-3 hover:bg-sky-700',
+          isHovered ? 'bg-red-800' : 'bg-gray-500'
         )}
         draggable
       >
@@ -42,7 +42,7 @@ const Tag: FunctionComponent<TagProps> = ({
       <button
         className={clsx(
           'rounded-r p-1 focus:outline-none transition-colors',
-          index === hoveredIndex ? 'text-white' : 'text-red'
+          index !== hoveredIndex ? 'text-white' : 'text-red-600'
         )}
         onClick={() => handleRemoveTag(index)}
         onMouseEnter={() => setHoveredIndex(index)}

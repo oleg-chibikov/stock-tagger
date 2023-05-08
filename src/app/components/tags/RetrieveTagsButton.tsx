@@ -62,7 +62,7 @@ export function RetrieveTagsButton({
         onClick={handlePress}
         disabled={loading}
       >
-        Retrieve Tags and Captions
+        Retrieve tags and captions
       </button>
       {loading && (
         <div className="ml-2 flex items-center">

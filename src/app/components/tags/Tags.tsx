@@ -43,7 +43,7 @@ const Tags: FunctionComponent<TagsProps> = ({ className }) => {
                 handleRemoveTag={handleRemoveTag}
                 setHoveredIndex={setHoveredIndex}
                 hoveredIndex={hoveredIndex}
-                isActive={index === hoveredIndex}
+                isHovered={index === hoveredIndex}
               />
             ))}
           </ReactSortable>
