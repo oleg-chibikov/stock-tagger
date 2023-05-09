@@ -34,14 +34,14 @@ const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
   uploadProgress,
 }) => {
   return (
-    <>
+    <div className="w-full mt-8 pr-2 overflow-auto max-h-96">
       {Object.keys(uploadProgress).map((imageName) => {
         const { progress, operation } = uploadProgress[imageName];
         return (
           <div key={imageName} className="my-2 w-full">
-            <div>{imageName}</div>
             <div className="flex flex-row items-center my-2">
-              <div className="bg-gray-200 h-3 w-full rounded-full overflow-hidden">
+              <div className="w-48 overflow-auto">{imageName}</div>
+              <div className="bg-gray-200 h-3 mx-5 w-full rounded-full overflow-hidden">
                 <div
                   className={clsx(
                     'bg-teal-500 h-full transition-all ease-out duration-500',
@@ -50,12 +50,14 @@ const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
                   style={{ width: `${progress * 100}%` }}
                 />
               </div>
-              <div className="ml-2">{operationToString(operation)}</div>
+              <div className="flex whitespace-nowrap justify-end w-60">
+                {operationToString(operation)}
+              </div>
             </div>
           </div>
         );
       })}
-    </>
+    </div>
   );
 };
 

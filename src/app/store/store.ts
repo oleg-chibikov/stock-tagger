@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { enableMapSet } from 'immer';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
 import imageReducer from './imageSlice';
 import tagReducer from './tagSlice';
 
+enableMapSet();
 const store = configureStore({
   reducer: {
     image: imageReducer,

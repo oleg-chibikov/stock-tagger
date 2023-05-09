@@ -2,12 +2,12 @@ import { FunctionComponent } from 'react';
 import Spinner from 'react-spinners/ScaleLoader';
 
 interface LoaderProps {
-  loading?: boolean;
+  isLoading?: boolean;
 }
-const Loader: FunctionComponent<LoaderProps> = ({ loading = true }) => (
+const Loader: FunctionComponent<LoaderProps> = ({ isLoading = true }) => (
   <Spinner
     color="#00BFFF"
-    loading={loading}
+    loading={isLoading}
     aria-label="Loading Spinner"
     data-testid="loader"
   />

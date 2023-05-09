@@ -9,14 +9,14 @@ import { useDispatch } from 'react-redux';
 import { ProgressLoader, ProgressState } from '../ProgressLoader';
 import { Gallery } from '../core/Gallery';
 import { ImagePicker } from '../core/ImagePicker';
-import { Loader } from '../core/Loader';
 
 interface MainSectionProps {
   className?: string;
 }
 
 const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUpscaled, setIsUpscaled] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<
     Record<string, ProgressState>
   >({});
@@ -26,6 +26,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
     if (images) {
       dispatch(setImages(images));
       dispatch(setTags([]));
+      setIsUpscaled(false);
     }
   };
   async function processImages(
@@ -36,7 +37,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
     ) => Promise<boolean>,
     eventAdditionalProcessing?: (data: UploadEvent) => void
   ) {
-    setLoading(true);
+    setIsLoading(true);
     const initialProgress: Record<string, ProgressState> = {};
     for (const image of images) {
       initialProgress[image.name] = {
@@ -62,55 +63,61 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       notUpscaledImages,
       upscaledImages
     );
-    setLoading(false);
+    setIsLoading(false);
   }
 
   return (
     <div
-      className={`${className} p-2 bg-gray-800 flex flex-col justify-center items-center`}
+      className={`${className} w-full p-4 bg-gray-800 flex flex-col justify-center items-center z-40`}
     >
-      <Loader loading={loading} />
-      {loading ? (
-        <ProgressLoader uploadProgress={uploadProgress} />
-      ) : (
-        <>
-          <ImagePicker className="mb-2" onSelect={selectImages} />
-          {Boolean(images.length) && (
-            <>
-              <Gallery />
-              <button
-                onClick={() =>
-                  processImages(upscale, (data) => {
-                    if (data.operation === 'upscale_done') {
-                      dispatch(setUpscaledUri(data));
-                      // TODO: show error (red border over the image)
-                    }
-                  })
-                }
-                className="mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
-              >
-                Upscale
-              </button>
-              <button
-                onClick={() =>
-                  processImages(uploadToSftp, (data) => {
-                    if (
-                      data.operation === 'ftp_upload_done' ||
-                      data.operation === 'ftp_upload_error'
-                    ) {
-                      // TODO: show error (red border over the image)
-                      dispatch(setUpscaledUri(data)); // the path will be undefined, so it should erase upscale_url
-                    }
-                  })
-                }
-                className="mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
-              >
-                Upload to stock
-              </button>
-            </>
-          )}
-        </>
+      {!isLoading && (
+        <ImagePicker className="w-full mb-2" onSelect={selectImages} />
       )}
+
+      <>
+        {Boolean(images.length) && (
+          <>
+            <Gallery uploadProgress={uploadProgress} />
+            {isLoading && <ProgressLoader uploadProgress={uploadProgress} />}
+            {!isLoading && (
+              <>
+                {!isUpscaled && (
+                  <button
+                    onClick={() =>
+                      processImages(upscale, (data) => {
+                        if (data.operation === 'upscale_done') {
+                          dispatch(setUpscaledUri(data));
+                          setIsUpscaled(true);
+                          // TODO: show error (red border over the image)
+                        }
+                      })
+                    }
+                    className="w-full mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
+                  >
+                    Upscale
+                  </button>
+                )}
+                <button
+                  onClick={() =>
+                    processImages(uploadToSftp, (data) => {
+                      if (
+                        data.operation === 'ftp_upload_done' ||
+                        data.operation === 'ftp_upload_error'
+                      ) {
+                        // TODO: show error (red border over the image)
+                        dispatch(setUpscaledUri(data)); // the path will be undefined, so it should erase upscale_url
+                      }
+                    })
+                  }
+                  className="w-full mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
+                >
+                  Upload to stock
+                </button>
+              </>
+            )}
+          </>
+        )}
+      </>
     </div>
   );
 };

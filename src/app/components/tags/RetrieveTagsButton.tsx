@@ -24,11 +24,13 @@ export function RetrieveTagsButton({
 }: Props) {
   const selectedImages = useAppSelector((state) => state.image.selectedImages);
   const images = useAppSelector((state) => state.image.images);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const tags = useAppSelector((state) => state.tag.tags);
   const dispatch = useDispatch();
 
-  const imagesToUse = selectedImages.length ? selectedImages : [images[0]];
+  const imagesToUse = selectedImages.size
+    ? images.filter((x) => selectedImages.has(x.name))
+    : [images[0]];
 
   const retrieveTags = async () => {
     const retrievedTags = [];
@@ -50,9 +52,9 @@ export function RetrieveTagsButton({
   };
 
   const handlePress = async () => {
-    setLoading(true);
+    setIsLoading(true);
     await Promise.all([retrieveTags(), retrieveCaptions()]);
-    setLoading(false);
+    setIsLoading(false);
   };
 
   return (
@@ -60,11 +62,11 @@ export function RetrieveTagsButton({
       <button
         className="disabled:bg-slate-500 bg-teal-500 hover:bg-teal-700 py-2 px-2 w-full"
         onClick={handlePress}
-        disabled={loading}
+        disabled={isLoading}
       >
         Retrieve tags and captions
       </button>
-      {loading && (
+      {isLoading && (
         <div className="ml-2 flex items-center">
           <Loader />
         </div>
