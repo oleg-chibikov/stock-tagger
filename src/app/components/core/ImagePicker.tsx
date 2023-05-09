@@ -24,7 +24,7 @@ const ImagePicker: FunctionComponent<ImagePickerProps> = ({
   };
 
   return (
-    <div className={clsx(['flex flex-col items-center space-y-2', className])}>
+    <div className={clsx('flex flex-col items-center space-y-2', className)}>
       <label
         htmlFor="image-input"
         className="bg-teal-500 hover:bg-teal-700 py-2 px-2"

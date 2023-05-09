@@ -25,7 +25,7 @@ const Tags: FunctionComponent<TagsProps> = ({ className }) => {
     dispatch(setTags(tags.map((x) => x.id as string)));
 
   return (
-    <div className={clsx(className, 'flex flex-col text-xs')}>
+    <div className={clsx('flex flex-col text-xs', className)}>
       {Boolean(tags.length) && (
         <>
           <span className="text-lg mb-2">Tags</span>

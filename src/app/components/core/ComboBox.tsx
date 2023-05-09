@@ -71,7 +71,7 @@ const ComboBox: FunctionComponent<ComboBoxProps> = ({
   return (
     <div className="relative w-full h-auto">
       <input
-        className={clsx(['w-full py-2 px-3', className])}
+        className={clsx('w-full py-2 px-3', className)}
         onChange={(event) => {
           setInputValue(event.target.value);
           onSelect(event.target.value as StringOrNumber); // StringOrNumber must be string when ComboBox is editable
@@ -100,11 +100,11 @@ const ComboBox: FunctionComponent<ComboBoxProps> = ({
               setShowList(false);
             }
           }}
-          className={clsx([
+          className={clsx(
             `max-h-96 w-full shadow-lg absolute top-full left-0 bg-gray-900 py-1 overflow-y-auto transition-opacity duration-500 ease-out`,
             showListWithOpacity ? 'opacity-100' : 'opacity-0',
-            listClassName,
-          ])}
+            listClassName
+          )}
         >
           {filterData.map((item, index) => (
             <React.Fragment key={index}>{renderItem({ item })}</React.Fragment>

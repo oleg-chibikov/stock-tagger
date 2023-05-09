@@ -28,7 +28,7 @@ export function NewTag({ className }: Props) {
   const reachedMaxTags = tags.length >= maxTags;
   const isEmpty = !newTag.trim().length;
   return (
-    <div className={clsx(['flex', className])}>
+    <div className={clsx('flex', className)}>
       <input
         type="text"
         value={newTag}

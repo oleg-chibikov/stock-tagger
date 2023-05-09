@@ -27,7 +27,7 @@ const Layout: FunctionComponent = () => {
   `;
 
   const sidePanelStyles = `
-    ${isSmallScreen ? 'w-full' : 'w-3/5'}
+    ${isSmallScreen ? 'w-full' : 'w-2/5'}
     mt-${isSmallScreen ? '4' : '0'}
   `;
 

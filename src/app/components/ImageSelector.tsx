@@ -1,9 +1,9 @@
 import { setSelectedImages } from '@store/imageSlice';
 import { useAppSelector } from '@store/store';
-import Image from 'next/image';
 import { FunctionComponent } from 'react';
 import { useDispatch } from 'react-redux';
 import { ImageWithData } from '../helpers/fileHelper';
+import { ZoomImage } from './core/ZoomImage';
 
 interface ImageSelectorProps {
   onProcess: () => void;
@@ -31,18 +31,8 @@ const ImageSelector: FunctionComponent<ImageSelectorProps> = ({
       <div className="flex gap-3 flex-wrap justify-center max-h-96 overflow-y-auto">
         {images.map((image, index) => {
           return (
-            <div
-              key={index}
-              className="relative w-24 h-24 cursor-pointer"
-              onClick={() => toggleImageSelection(image)}
-            >
-              <Image
-                alt="image"
-                width={100}
-                height={100}
-                src={image.uri}
-                className="w-full h-full object-cover"
-              />
+            <div key={index} onClick={() => toggleImageSelection(image)}>
+              <ZoomImage src={image.uri} />
               {selectedImages.includes(image) && (
                 <div className="absolute top-0 right-0 w-6 h-6 flex justify-center items-center bg-white rounded-full border-black border-2">
                   <span className="text-black font-bold">✓</span>

@@ -14,11 +14,11 @@ const HelpIcon: FunctionComponent<HelpIconProps> = ({
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
-    <div className={clsx(className, 'self-center relative inline-block')}>
+    <div className={clsx('self-center relative inline-block', className)}>
       <FaInfoCircle
         className={clsx(
-          iconClassName,
-          'w-10 h-10 cursor-pointer text-teal-500'
+          'w-10 h-10 cursor-pointer text-teal-500',
+          iconClassName
         )}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
