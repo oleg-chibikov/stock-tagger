@@ -1,5 +1,6 @@
 import { uploadToSftp, upscale } from '@apiClient/backendApiClient';
 import { ImageWithData } from '@appHelper/fileHelper';
+import { HelpIcon } from '@components/HelpIcon';
 import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
 import { setImages, setUpscaledUri } from '@store/imageSlice';
 import { useAppSelector } from '@store/store';
@@ -71,13 +72,16 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       className={`${className} w-full p-4 bg-gray-800 flex flex-col justify-center items-center z-40`}
     >
       {!isLoading && (
-        <ImagePicker className="w-full mb-2" onSelect={selectImages} />
+        <div className="flex w-full content-centerr">
+          <ImagePicker className="w-full" onSelect={selectImages} />
+          <HelpIcon className="ml-2 z-30" />
+        </div>
       )}
 
       <>
         {Boolean(images.length) && (
           <>
-            <Gallery uploadProgress={uploadProgress} />
+            <Gallery className="mt-2" uploadProgress={uploadProgress} />
             {isLoading && <ProgressLoader uploadProgress={uploadProgress} />}
             {!isLoading && (
               <>

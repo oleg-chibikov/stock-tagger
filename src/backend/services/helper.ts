@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 import { File, Files } from 'formidable';
-import { existsSync, mkdirSync, unlink } from 'fs';
+import { existsSync, mkdirSync, readdir, unlink } from 'fs';
 import path from 'path';
 
 const getCondaPath = () =>
@@ -72,9 +72,19 @@ const deleteFile = (path: string) => {
   });
 };
 
-const createFolderIfNotExists = (folderPath: string) => {
+const createOrClearFolder = (folderPath: string) => {
   if (!existsSync(folderPath)) {
     mkdirSync(folderPath, { recursive: true });
+  } else {
+    readdir(folderPath, (err, files) => {
+      if (err) {
+        throw err;
+      }
+
+      for (const file of files) {
+        deleteFile(path.join(folderPath, file));
+      }
+    });
   }
 };
 
@@ -89,5 +99,5 @@ export {
   generateRandomString,
   deleteFile,
   capitalize,
-  createFolderIfNotExists,
+  createOrClearFolder,
 };

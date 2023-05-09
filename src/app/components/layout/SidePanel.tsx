@@ -1,8 +1,9 @@
 import { categories } from '@constants/categories';
 import { useAppSelector } from '@store/store';
+import { setTags } from '@store/tagSlice';
 import { FunctionComponent, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { downloadCSV } from '../../helpers/csvHelper';
-import { HelpIcon } from '../HelpIcon';
 import { ComboBoxItem } from '../core/ComboBox';
 import { LabeledPicker } from '../core/LabeledPicker';
 import { NewTag } from '../tags/NewTag';
@@ -21,6 +22,7 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className = '' }) => {
   const [category, setCategory] = useState<number>();
   const [captions, setCaptions] = useState<ComboBoxItem[]>([]);
   const [areCaptionsLoading, setAreCaptionsLoading] = useState<boolean>();
+  const dispatch = useDispatch();
 
   if (!images.length) {
     return null;
@@ -32,7 +34,6 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className = '' }) => {
 
   return (
     <div className={`bg-gray-800 p-2 ${className}`}>
-      <HelpIcon className="z-30" />
       <LabeledPicker
         labelClassName="w-28"
         label="Title"
@@ -78,11 +79,21 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className = '' }) => {
             <>
               <Tags className="mt-2" />
               <button
+                onClick={() => {
+                  if (confirm('Clear all the tags?')) {
+                    dispatch(setTags([]));
+                  }
+                }}
+                className="w-full mt-2 px-2 py-2 bg-gray-500 hover:bg-red-600"
+              >
+                Clear tags
+              </button>
+              <button
                 onClick={downloadTags}
                 className="w-full mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-600"
               >
                 Download tags
-              </button>{' '}
+              </button>
             </>
           )}
         </>

@@ -1,16 +1,21 @@
 import { ProgressState } from '@components/ProgressLoader';
+import { Styleable } from '@components/Styleable';
 import { toggleSelection } from '@store/imageSlice';
 import { useAppSelector } from '@store/store';
+import clsx from 'clsx';
 import { FunctionComponent } from 'react';
 import { useDispatch } from 'react-redux';
 import { LoaderOverlay } from './LoaderOverlay';
 import { ZoomImage } from './ZoomImage';
 
-type GalleryProps = {
+interface GalleryProps extends Styleable {
   uploadProgress: Record<string, ProgressState>;
-};
+}
 
-const Gallery: FunctionComponent<GalleryProps> = ({ uploadProgress }) => {
+const Gallery: FunctionComponent<GalleryProps> = ({
+  uploadProgress,
+  className,
+}) => {
   const images = useAppSelector((state) => state.image.images);
   const selectedImages = useAppSelector((state) => state.image.selectedImages);
   const dispatch = useDispatch();
@@ -20,7 +25,7 @@ const Gallery: FunctionComponent<GalleryProps> = ({ uploadProgress }) => {
   };
 
   return (
-    <div className="relative">
+    <div className={clsx('relative', className)}>
       <div className="w-full flex gap-3 flex-wrap justify-start max-h-96 overflow-y-auto">
         {images.map((image, index) => {
           const progress = uploadProgress[image.name];

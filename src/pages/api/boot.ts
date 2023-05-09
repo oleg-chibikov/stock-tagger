@@ -1,6 +1,6 @@
 import { CaptioningService } from '@services/captioningService';
 import {
-  createFolderIfNotExists,
+  createOrClearFolder,
   getCondaPath,
   runCommands,
 } from '@services/helper';
@@ -52,7 +52,7 @@ const bootHandler = async () => {
   });
 
   await register('Create Folders', async () => {
-    createFolderIfNotExists('public');
+    createOrClearFolder('public');
   });
 
   await register('Register Sftp', async () => {

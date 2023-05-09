@@ -10,16 +10,13 @@ interface Props extends Styleable {}
 
 export function NewTag({ className }: Props) {
   const dispatch = useDispatch();
-  const handlePrependTag = (tag: string) => {
-    dispatch(prependTag(tag));
-  };
   const [newTag, setNewTag] = useState('');
   const tags = useAppSelector((state) => state.tag.tags);
   const handleAddTag = () => {
     if (newTag) {
       const set = new Set(tags);
       if (!set.has(newTag)) {
-        handlePrependTag(newTag.trim());
+        dispatch(prependTag(newTag));
       }
       setNewTag('');
     }

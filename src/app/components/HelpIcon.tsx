@@ -26,7 +26,7 @@ const HelpIcon: FunctionComponent<HelpIconProps> = ({
       {showTooltip && (
         <div
           className={
-            'min-w-max bg-gray-100 text-sm text-black border p-2 rounded-lg shadow-md absolute top-full left-1/2 transform -translate-x-1/2 text-center'
+            'min-w-max bg-gray-100 text-sm text-black border p-2 rounded-lg shadow-md absolute top-full left-full transform -translate-x-full text-center'
           }
         >
           Select the images for which you would like to get the tags.
@@ -40,7 +40,7 @@ const HelpIcon: FunctionComponent<HelpIconProps> = ({
           Without the selection only the first image will be used for tag
           retrieval.
           <div
-            className="absolute top-0 left-1/2 w-4 h-4"
+            className="absolute top-0 right-1 w-4 h-4"
             style={{
               transform: 'translate(-50%, -50%) rotate(45deg)',
               background: 'inherit',
