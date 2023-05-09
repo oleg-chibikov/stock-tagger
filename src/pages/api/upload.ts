@@ -1,24 +1,22 @@
 import { PROGRESS } from '@dataTransferTypes/event';
-import { UploadEvent, UploadOperation } from '@dataTransferTypes/upload';
+import {
+  ImageFileData,
+  UploadEvent,
+  UploadOperation,
+} from '@dataTransferTypes/upload';
 import { deleteFile, getFilesFromRequest } from '@services/helper';
 import { SftpService } from '@services/sftpService';
-import { UpscalerService } from '@services/upscalerService';
 import EventEmitter from 'events';
-import formidable, { File } from 'formidable';
+import formidable from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Container from 'typedi';
-
-interface TempResult {
-  outputFilePath: string;
-  originalFilename: string;
-}
+import { toServerUrl } from '../../backend/helpers/uploadHelper';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   console.log('Uploading images...');
-  const upscalerService = Container.get(UpscalerService);
   const sftpService = Container.get(SftpService);
   const eventEmitter = Container.get(EventEmitter);
   const form = new formidable.IncomingForm({
@@ -26,67 +24,34 @@ export default async function handler(
     multiples: true,
   });
 
-  form.parse(req, async (err, _fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) {
       console.error(err);
       res.status(500).send('An error occurred');
       return;
     }
 
-    const upscaleProgress = 0.1;
-    const halfProgress = 0.5;
-
-    const upscaleImage = async (image: File): Promise<string> => {
-      try {
-        eventEmitter.emit(PROGRESS, {
-          fileName: image.originalFilename,
-          progress: upscaleProgress,
-          operation: 'upscale',
-        });
-        const outputDirectory = 'output';
-        return await upscalerService.upscale(
-          image.filepath,
-          outputDirectory,
-          image.newFilename
-        );
-      } finally {
-        deleteFile(image.filepath);
-      }
-    };
-
-    const upscaleImages = async (): Promise<TempResult[]> => {
-      console.log(`Processing ${images.length} images...`);
-
-      const results: TempResult[] = [];
-
-      // Sequentially executing as upscaling is a GPU heavy operation and hardly can be run in parallel
-      for (const image of images) {
-        const outputFilePath = await upscaleImage(image);
-        emitEvent(image.originalFilename as string, halfProgress, 'upscale');
-        results.push({
-          outputFilePath,
-          originalFilename: image.originalFilename as string,
-        });
-      }
-      return results;
-    };
-
-    const uploadImagesToFtp = async (images: TempResult[]): Promise<void> => {
+    const uploadImagesToFtp = async (
+      images: ImageFileData[]
+    ): Promise<void> => {
       console.log(`Uploading to ftp...`);
       // Create an array of promises for each image upload and execute in parallel
-      const promises = images.map(async (result) => {
+      const promises = images.map(async (image) => {
         try {
-          emitEvent(result.originalFilename, halfProgress, 'ftp_upload');
+          emitEvent(image.fileName, 0.1, 'ftp_upload');
           await sftpService.uploadToSftp(
-            result.outputFilePath,
-            result.originalFilename,
+            image.filePath,
+            image.fileName,
             (fileName, progress) => {
               // Emit an event with the progress of the file transfer
-              emitEvent(fileName, halfProgress + progress / 2, 'ftp_upload');
+              emitEvent(fileName, progress, 'ftp_upload');
             }
           );
+          emitEvent(image.fileName as string, 1, 'ftp_upload_done');
+        } catch (err: unknown) {
+          emitEvent(image.fileName, 1, 'ftp_upload_error');
         } finally {
-          deleteFile(result.outputFilePath);
+          deleteFile(image.filePath);
         }
       });
 
@@ -95,9 +60,30 @@ export default async function handler(
     };
 
     const images = getFilesFromRequest(files);
-    const results = await upscaleImages();
 
-    await uploadImagesToFtp(results);
+    if (images.length) {
+      console.log(`Uploading ${images.length} original images...`);
+
+      await uploadImagesToFtp(
+        images.map((x) => ({
+          filePath: x.filepath,
+          fileName: x.originalFilename as string,
+        }))
+      );
+    }
+
+    const upscaledImagesData = fields?.upscaledImagesData;
+    if (upscaledImagesData?.length) {
+      const imagesFileData = JSON.parse(
+        upscaledImagesData as string
+      ) as ImageFileData[];
+      console.log(`Uploading ${imagesFileData.length} upscaled images...`);
+      for (const image of imagesFileData) {
+        image.filePath = toServerUrl(image.filePath);
+      }
+
+      await uploadImagesToFtp(imagesFileData);
+    }
 
     res.status(200).end();
   });
@@ -105,10 +91,12 @@ export default async function handler(
   const emitEvent = (
     fileName: string,
     progress: number,
-    operation: UploadOperation
+    operation: UploadOperation,
+    filePath?: string
   ) => {
     eventEmitter.emit(PROGRESS, {
       fileName,
+      filePath,
       progress,
       operation,
     } as UploadEvent);

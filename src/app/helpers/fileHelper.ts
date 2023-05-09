@@ -28,6 +28,7 @@ interface ImageWithData {
   name: string;
   uri: string;
   type: string;
+  upscaledUri?: string;
 }
 
 export type { ImageWithData };

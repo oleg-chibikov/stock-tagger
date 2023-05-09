@@ -25,7 +25,7 @@ const Gallery: FunctionComponent = ({}) => {
       {images.map((image, index) => {
         return (
           <div key={index} onClick={() => toggleImageSelection(image)}>
-            <ZoomImage src={image.uri} />
+            <ZoomImage backgroundSrc={image.upscaledUri} src={image.uri} />
             {selectedImages.includes(image) && (
               <div className="absolute top-0 right-0 w-6 h-6 flex justify-center items-center bg-white rounded-full border-black border-2">
                 <span className="text-black font-bold">✓</span>

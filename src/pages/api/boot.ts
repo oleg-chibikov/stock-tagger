@@ -1,16 +1,15 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { CaptioningService } from '@services/captioningService';
-import { UpscalerService } from '@services/upscalerService';
-import EventEmitter from 'events';
-import 'reflect-metadata';
-import Client from 'ssh2-sftp-client';
-import { Container } from 'typedi';
 import {
   createFolderIfNotExists,
   getCondaPath,
   runCommands,
 } from '@services/helper';
-
+import { UpscalerService } from '@services/upscalerService';
+import EventEmitter from 'events';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import 'reflect-metadata';
+import Client from 'ssh2-sftp-client';
+import { Container } from 'typedi';
 
 const bootedServices = new Set();
 
@@ -29,6 +28,9 @@ const bootHandler = async () => {
     }
   };
   await register('Create Conda Environment', async () => {
+    if (Boolean(process.env.SKIP_INSTALL)) {
+      return;
+    }
     const environments = await runCommands(
       ['conda info --env'],
       getCondaPath()
@@ -50,10 +52,10 @@ const bootHandler = async () => {
   });
 
   await register('Create Folders', async () => {
-    createFolderIfNotExists('output');
+    createFolderIfNotExists('public');
   });
 
-  await register('Sftp', async () => {
+  await register('Register Sftp', async () => {
     const sftp = new Client();
     // Define or import the sftpConfig object
     const sftpConfig = {
@@ -108,18 +110,24 @@ const bootHandler = async () => {
     }
   });
 
-  await register('Event Emitter', async () => {
+  await register('Register Event Emitter', async () => {
     const emitter = new EventEmitter();
     Container.set(EventEmitter, emitter);
   });
 
-  await register('Upscaler Service', async () => {
+  await register('Register Upscaler Service', async () => {
     const upscalerService = Container.get(UpscalerService);
+    if (Boolean(process.env.SKIP_INSTALL)) {
+      return;
+    }
     await upscalerService.installDependencies();
   });
 
-  await register('Captioning Service', async () => {
+  await register('Register Captioning Service', async () => {
     const captioningService = Container.get(CaptioningService);
+    if (Boolean(process.env.SKIP_INSTALL)) {
+      return;
+    }
     await captioningService.installDependencies();
   });
 

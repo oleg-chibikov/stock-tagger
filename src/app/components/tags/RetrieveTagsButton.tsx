@@ -43,9 +43,9 @@ export function RetrieveTagsButton({
 
   const retrieveCaptions = async () => {
     onStart();
-    await getCaptions(imagesToUse, (data) => {
+    await getCaptions((data) => {
       onCaptionRetrieved(data);
-    });
+    }, imagesToUse);
     onFinish();
   };
 

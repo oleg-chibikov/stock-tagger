@@ -5,15 +5,22 @@ import { FunctionComponent, useEffect, useState } from 'react';
 
 interface ZoomProps extends Styleable {
   src: string;
+  backgroundSrc?: string;
 }
 
-const ZoomImage: FunctionComponent<ZoomProps> = ({ src, className }) => {
+const ZoomImage: FunctionComponent<ZoomProps> = ({
+  src,
+  backgroundSrc,
+  className,
+}) => {
   const [backgroundImage, setBackgroundImage] = useState(`url(${src})`);
   const [isHovered, setIsHovered] = useState(false);
   const [backgroundPosition, setBackgroundPosition] = useState('0% 0%');
+  const [zoomLevel, setZoomLevel] = useState(1);
+
   useEffect(() => {
-    setBackgroundImage(`url(${src})`);
-  }, [src]);
+    setBackgroundImage(`url(${backgroundSrc ?? src})`);
+  }, [src, backgroundSrc]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } =
@@ -23,6 +30,11 @@ const ZoomImage: FunctionComponent<ZoomProps> = ({ src, className }) => {
     setBackgroundPosition(`${x}% ${y}%`);
   };
 
+  const handleMouseWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const newZoomLevel = Math.min(Math.max(zoomLevel - e.deltaY * 0.01, 1), 20);
+    setZoomLevel(newZoomLevel);
+  };
+
   return (
     <div
       className={clsx(
@@ -30,6 +42,7 @@ const ZoomImage: FunctionComponent<ZoomProps> = ({ src, className }) => {
         isHovered ? 'w-96 h-96' : 'w-36 h-36',
         className
       )}
+      onWheel={handleMouseWheel}
     >
       {isHovered && (
         <figure
@@ -42,6 +55,7 @@ const ZoomImage: FunctionComponent<ZoomProps> = ({ src, className }) => {
             backgroundRepeat: 'no-repeat',
             backgroundImage,
             backgroundPosition,
+            backgroundSize: `${zoomLevel * 100}%`,
           }}
         />
       )}

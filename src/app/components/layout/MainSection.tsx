@@ -1,6 +1,7 @@
-import { upscaleAndUploadToStock } from '@apiClient/backendApiClient';
+import { uploadToSftp, upscale } from '@apiClient/backendApiClient';
 import { ImageWithData } from '@appHelper/fileHelper';
-import { setImages } from '@store/imageSlice';
+import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
+import { setImages, setUpscaledUri } from '@store/imageSlice';
 import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
 import { FunctionComponent, useState } from 'react';
@@ -27,7 +28,14 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       dispatch(setTags([]));
     }
   };
-  async function processImages() {
+  async function processImages(
+    operation: (
+      onProgress: (event: UploadEvent) => void,
+      imageData: ImageWithData[],
+      upscaledImagesData?: ImageFileData[]
+    ) => Promise<boolean>,
+    eventAdditionalProcessing?: (data: UploadEvent) => void
+  ) {
     setLoading(true);
     const initialProgress: Record<string, ProgressState> = {};
     for (const image of images) {
@@ -37,12 +45,23 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       };
     }
     setUploadProgress(initialProgress);
-    await upscaleAndUploadToStock(images, (data) => {
-      setUploadProgress((prevUploadProgress) => ({
-        ...prevUploadProgress,
-        [data.fileName]: data,
-      }));
-    });
+    const upscaledImages = images
+      .filter((x) => x.upscaledUri)
+      .map(
+        (x) => ({ fileName: x.name, filePath: x.upscaledUri } as ImageFileData)
+      );
+    const notUpscaledImages = images.filter((x) => !x.upscaledUri);
+    await operation(
+      (data) => {
+        eventAdditionalProcessing?.(data);
+        setUploadProgress((prevUploadProgress) => ({
+          ...prevUploadProgress,
+          [data.fileName]: data,
+        }));
+      },
+      notUpscaledImages,
+      upscaledImages
+    );
     setLoading(false);
   }
 
@@ -60,10 +79,33 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
             <>
               <Gallery />
               <button
-                onClick={processImages}
+                onClick={() =>
+                  processImages(upscale, (data) => {
+                    if (data.operation === 'upscale_done') {
+                      dispatch(setUpscaledUri(data));
+                      // TODO: show error (red border over the image)
+                    }
+                  })
+                }
                 className="mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
               >
-                Upscale and upload images to stock
+                Upscale
+              </button>
+              <button
+                onClick={() =>
+                  processImages(uploadToSftp, (data) => {
+                    if (
+                      data.operation === 'ftp_upload_done' ||
+                      data.operation === 'ftp_upload_error'
+                    ) {
+                      // TODO: show error (red border over the image)
+                      dispatch(setUpscaledUri(data)); // the path will be undefined, so it should erase upscale_url
+                    }
+                  })
+                }
+                className="mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
+              >
+                Upload to stock
               </button>
             </>
           )}
