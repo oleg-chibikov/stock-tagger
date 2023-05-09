@@ -27,7 +27,7 @@ const ZoomImage: FunctionComponent<ZoomProps> = ({ src, className }) => {
     <div
       className={clsx(
         'cursor-move relative inset-0 border-2 border-gray-400',
-        isHovered ? 'w-96 h-96' : 'w-24 h-24',
+        isHovered ? 'w-96 h-96' : 'w-36 h-36',
         className
       )}
     >

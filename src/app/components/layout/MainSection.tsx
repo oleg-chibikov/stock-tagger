@@ -5,8 +5,8 @@ import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
 import { FunctionComponent, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { ImageSelector } from '../ImageSelector';
 import { ProgressLoader, ProgressState } from '../ProgressLoader';
+import { Gallery } from '../core/Gallery';
 import { ImagePicker } from '../core/ImagePicker';
 import { Loader } from '../core/Loader';
 
@@ -57,11 +57,15 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
         <>
           <ImagePicker className="mb-2" onSelect={selectImages} />
           {Boolean(images.length) && (
-            <ImageSelector
-              onProcess={() => {
-                processImages();
-              }}
-            />
+            <>
+              <Gallery />
+              <button
+                onClick={processImages}
+                className="mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
+              >
+                Upscale and upload images to stock
+              </button>
+            </>
           )}
         </>
       )}
