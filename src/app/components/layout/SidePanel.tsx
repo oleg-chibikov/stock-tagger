@@ -30,6 +30,9 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className = '' }) => {
 
   const downloadTags = () => {
     downloadCSV(images, tags, title, true, category);
+    window
+      ?.open('https://contributor.stock.adobe.com/en/uploads', '_blank')
+      ?.focus();
   };
 
   return (

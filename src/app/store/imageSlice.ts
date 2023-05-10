@@ -30,11 +30,22 @@ const imageSlice = createSlice({
       const image = state.images.find((x) => x.name == action.payload.fileName);
       if (image) {
         image.upscaledUri = action.payload.filePath;
+        image.uploadedToFtp = false;
+      }
+    },
+    setIsUploadedToFtp: (state, action: PayloadAction<UploadEvent>) => {
+      const image = state.images.find((x) => x.name == action.payload.fileName); // TODO: can we store images in a set?
+      if (image) {
+        image.uploadedToFtp = true;
       }
     },
   },
 });
 
-export const { setImages, setUpscaledUri, toggleSelection } =
-  imageSlice.actions;
+export const {
+  setImages,
+  setUpscaledUri,
+  setIsUploadedToFtp,
+  toggleSelection,
+} = imageSlice.actions;
 export default imageSlice.reducer;

@@ -2,14 +2,25 @@ import { uploadToSftp, upscale } from '@apiClient/backendApiClient';
 import { ImageWithData } from '@appHelper/fileHelper';
 import { HelpIcon } from '@components/HelpIcon';
 import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
-import { setImages, setUpscaledUri } from '@store/imageSlice';
+import {
+  setImages,
+  setIsUploadedToFtp,
+  setUpscaledUri,
+} from '@store/imageSlice';
 import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { ProgressLoader, ProgressState } from '../ProgressLoader';
 import { Gallery } from '../core/Gallery';
 import { ImagePicker } from '../core/ImagePicker';
+
+const getNotUpscaledImages = (data: ImageWithData[]) =>
+  data.filter((x) => !x.upscaledUri);
+const getUpscaledImages = (data: ImageWithData[]) =>
+  data.filter((x) => x.upscaledUri);
+const getNotUploadedImages = (data: ImageWithData[]) =>
+  data.filter((x) => !x.uploadedToFtp);
 
 interface MainSectionProps {
   className?: string;
@@ -17,42 +28,64 @@ interface MainSectionProps {
 
 const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isUpscaled, setIsUpscaled] = useState(false);
+  const [allAreUpscaled, setAllAreUpscaled] = useState(false);
+  const [allAreUploaded, setAllAreUploaded] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<
     Record<string, ProgressState>
   >({});
+  const selectedImages = useAppSelector((state) => state.image.selectedImages);
   const images = useAppSelector((state) => state.image.images);
   const dispatch = useDispatch();
-  const selectImages = async (images: ImageWithData[] | null) => {
+
+  useEffect(() => {
+    if (images.length && !getNotUpscaledImages(images).length) {
+      setAllAreUpscaled(true);
+    }
+    if (images.length && !getNotUploadedImages(images).length) {
+      setAllAreUploaded(true);
+    }
+  }, [images]);
+
+  const processUploadedImages = async (images: ImageWithData[] | null) => {
     if (images) {
       dispatch(setImages(images));
       dispatch(setTags([]));
-      setIsUpscaled(false);
+      setAllAreUpscaled(false);
     }
   };
-  async function processImages(
+
+  const processImages = async (
     operation: (
       onProgress: (event: UploadEvent) => void,
       imageData: ImageWithData[],
       upscaledImagesData?: ImageFileData[]
     ) => Promise<boolean>,
+    filterImage: (image: ImageWithData) => boolean,
     eventAdditionalProcessing?: (data: UploadEvent) => void
-  ) {
+  ) => {
+    const imagesToProcess = (
+      selectedImages.size > 0
+        ? images.filter((x) => selectedImages.has(x.name))
+        : images
+    ).filter(filterImage);
+    if (!imagesToProcess.length) {
+      return;
+    }
     setIsLoading(true);
+
     const initialProgress: Record<string, ProgressState> = {};
-    for (const image of images) {
+    for (const image of imagesToProcess) {
       initialProgress[image.name] = {
         progress: 0,
         operation: 'unknown',
       };
     }
+
     setUploadProgress(initialProgress);
-    const upscaledImages = images
-      .filter((x) => x.upscaledUri)
-      .map(
-        (x) => ({ fileName: x.name, filePath: x.upscaledUri } as ImageFileData)
-      );
-    const notUpscaledImages = images.filter((x) => !x.upscaledUri);
+    const upscaledImages = getUpscaledImages(imagesToProcess).map(
+      (x) => ({ fileName: x.name, filePath: x.upscaledUri } as ImageFileData)
+    );
+    const notUpscaledImages = getNotUpscaledImages(imagesToProcess);
     await operation(
       (data) => {
         eventAdditionalProcessing?.(data);
@@ -65,7 +98,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       upscaledImages
     );
     setIsLoading(false);
-  }
+  };
 
   return (
     <div
@@ -73,7 +106,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
     >
       {!isLoading && (
         <div className="flex w-full content-centerr">
-          <ImagePicker className="w-full" onSelect={selectImages} />
+          <ImagePicker className="w-full" onSelect={processUploadedImages} />
           <HelpIcon className="ml-2 z-30" />
         </div>
       )}
@@ -85,38 +118,43 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
             {isLoading && <ProgressLoader uploadProgress={uploadProgress} />}
             {!isLoading && (
               <>
-                {!isUpscaled && (
+                {!allAreUpscaled && (
                   <button
                     onClick={() =>
-                      processImages(upscale, (data) => {
-                        if (data.operation === 'upscale_done') {
-                          dispatch(setUpscaledUri(data));
-                          setIsUpscaled(true);
-                          // TODO: show error (red border over the image)
+                      processImages(
+                        upscale,
+                        (image) => !image.upscaledUri, // upscale only those not upscaled
+                        (data) => {
+                          if (data.operation === 'upscale_done') {
+                            dispatch(setUpscaledUri(data));
+                            setAllAreUploaded(false); // if something is upscaled it means it can be re-uploaded
+                          }
                         }
-                      })
+                      )
                     }
                     className="w-full mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
                   >
                     Upscale
                   </button>
                 )}
-                <button
-                  onClick={() =>
-                    processImages(uploadToSftp, (data) => {
-                      if (
-                        data.operation === 'ftp_upload_done' ||
-                        data.operation === 'ftp_upload_error'
-                      ) {
-                        // TODO: show error (red border over the image)
-                        dispatch(setUpscaledUri(data)); // the path will be undefined, so it should erase upscale_url
-                      }
-                    })
-                  }
-                  className="w-full mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
-                >
-                  Upload to stock
-                </button>
+                {!allAreUploaded && (
+                  <button
+                    onClick={() =>
+                      processImages(
+                        uploadToSftp,
+                        (image) => !image.uploadedToFtp, // upload only those not uploaded
+                        (data) => {
+                          if (data.operation === 'ftp_upload_done') {
+                            dispatch(setIsUploadedToFtp(data));
+                          }
+                        }
+                      )
+                    }
+                    className="w-full mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
+                  >
+                    Upload to stock
+                  </button>
+                )}
               </>
             )}
           </>

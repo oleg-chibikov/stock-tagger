@@ -4,7 +4,7 @@ import {
   UploadEvent,
   UploadOperation,
 } from '@dataTransferTypes/upload';
-import { deleteFile, getFilesFromRequest } from '@services/helper';
+import { getFilesFromRequest } from '@services/helper';
 import { SftpService } from '@services/sftpService';
 import EventEmitter from 'events';
 import formidable from 'formidable';
@@ -51,7 +51,7 @@ export default async function handler(
         } catch (err: unknown) {
           emitEvent(image.fileName, 1, 'ftp_upload_error');
         } finally {
-          deleteFile(image.filePath);
+          // deleteFile(image.filePath);
         }
       });
 

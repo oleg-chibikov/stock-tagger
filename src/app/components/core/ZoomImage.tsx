@@ -1,7 +1,7 @@
 import { Styleable } from '@components/Styleable';
 import clsx from 'clsx';
 import Image from 'next/image';
-import { FunctionComponent, useEffect, useState } from 'react';
+import { FunctionComponent, ReactNode, useEffect, useState } from 'react';
 
 interface ZoomProps extends Styleable {
   src: string;
@@ -9,15 +9,15 @@ interface ZoomProps extends Styleable {
   isUpscaled: boolean;
   isSelected: boolean;
   onClick: () => void;
+  children?: ReactNode;
 }
 
 const ZoomImage: FunctionComponent<ZoomProps> = ({
   src,
   backgroundSrc,
-  isSelected,
-  isUpscaled,
   className,
   onClick,
+  children,
 }) => {
   const [backgroundImage, setBackgroundImage] = useState(`url(${src})`);
   const [isHovered, setIsHovered] = useState(false);
@@ -50,16 +50,7 @@ const ZoomImage: FunctionComponent<ZoomProps> = ({
       onWheel={handleMouseWheel}
     >
       <div className="relative">
-        {isSelected && (
-          <div className="absolute top-3 right-3 w-6 h-6 flex justify-center items-center bg-white rounded-full border-black border-2">
-            <span className="text-black font-bold">✓</span>
-          </div>
-        )}
-        {isUpscaled && (
-          <div className="absolute top-3 left-3 w-6 h-6 flex justify-center items-center bg-white rounded-full border-black border-2">
-            <span className="text-black font-bold">U</span>
-          </div>
-        )}
+        {children}
         <Image
           onClick={onClick}
           width={10}
@@ -78,7 +69,10 @@ const ZoomImage: FunctionComponent<ZoomProps> = ({
       </div>
       {isHovered && (
         <figure
-          className="border-solid border-8 border-white border-spacing-2 top-0 opacity-95 absolute w-96 h-96 z-10"
+          className={clsx(
+            'border-solid border-8 border-white border-spacing-2 top-0 opacity-95 absolute w-96 h-96 z-10',
+            className
+          )}
           onClick={onClick}
           onMouseLeave={() => {
             setIsHovered(false);

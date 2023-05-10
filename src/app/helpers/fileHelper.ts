@@ -29,6 +29,7 @@ interface ImageWithData {
   uri: string;
   type: string;
   upscaledUri?: string;
+  uploadedToFtp?: boolean;
 }
 
 export type { ImageWithData };

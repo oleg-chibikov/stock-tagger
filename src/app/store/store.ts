@@ -10,6 +10,8 @@ const store = configureStore({
     image: imageReducer,
     tag: tagReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({ serializableCheck: false }), // The application stores a Set to improve its performance
 });
 
 type RootState = ReturnType<typeof store.getState>;
