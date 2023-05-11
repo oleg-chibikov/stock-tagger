@@ -30,6 +30,11 @@ export function NewTag({ className }: Props) {
         type="text"
         value={newTag}
         onChange={(event) => setNewTag(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            handleAddTag();
+          }
+        }}
         placeholder="Enter new tag"
         className="w-full p-2 rounded mr-2"
       />

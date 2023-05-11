@@ -1,7 +1,7 @@
 import { categories } from '@constants/categories';
 import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { downloadCSV } from '../../helpers/csvHelper';
 import { ComboBoxItem } from '../core/ComboBox';
@@ -23,6 +23,12 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className = '' }) => {
   const [captions, setCaptions] = useState<ComboBoxItem[]>([]);
   const [areCaptionsLoading, setAreCaptionsLoading] = useState<boolean>();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    setTitle('');
+    setCategory(undefined);
+    setCaptions([]);
+  }, [images]);
 
   if (!images.length) {
     return null;
@@ -67,13 +73,18 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className = '' }) => {
               if (!title.length) {
                 setTitle(caption.caption);
               }
-              setCaptions((prevState) => [
-                ...prevState,
-                {
-                  label: caption.caption,
-                  value: caption.caption,
-                },
-              ]);
+              // duplicate captions are not allowed
+              if (captions.map((x) => x.value).indexOf(caption.caption) < 0) {
+                setCaptions((prevState) => {
+                  return [
+                    ...prevState,
+                    {
+                      label: caption.caption,
+                      value: caption.caption,
+                    },
+                  ];
+                });
+              }
             }}
             className="mt-2"
           />
