@@ -39,7 +39,7 @@ export function NewTag({ className }: Props) {
         className="w-full p-2 rounded mr-2"
       />
       <button
-        className="disabled:bg-slate-500 bg-teal-500 hover:bg-teal-700 py-2 px-2"
+        className="disabled:bg-slate-500 disabled:cursor-not-allowed bg-teal-500 hover:bg-teal-700 py-2 px-2"
         disabled={isEmpty || reachedMaxTags}
         onClick={handleAddTag}
         title={

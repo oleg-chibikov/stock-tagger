@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ImageWithData, toBase64 } from '../helpers/fileHelper';
+import { ImageWithData, toBase64 } from '../helpers/imageHelper';
 
 interface Tag {
   confidence: number;

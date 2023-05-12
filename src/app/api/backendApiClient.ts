@@ -2,15 +2,26 @@ import { CaptionEvent } from '@dataTransferTypes/caption';
 import { CAPTION_AVAILIABLE, PROGRESS } from '@dataTransferTypes/event';
 import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
 import axios, { AxiosResponse } from 'axios';
-import { ImageWithData, toFile } from '../helpers/fileHelper';
+import { ImageWithData, toFile } from '../helpers/imageHelper';
 
 // TODO: handle errors in this file and show them in popup
+
+const uploadCsv = async (fileContent: string) => {
+  const url = 'https://contributor.stock.adobe.com/en/uploads';
+
+  const response = await axios.post('/api/uploadCsv', {
+    url,
+    fileContent,
+  });
+
+  console.log(response.data.message);
+};
 
 const getCaptions = async (
   onProgress: (event: CaptionEvent) => void,
   imageData: ImageWithData[]
 ): Promise<boolean> =>
-  await postWithEvents<CaptionEvent>(
+  await postImagesWithEvents<CaptionEvent>(
     '/api/caption',
     '/api/captionEvents',
     CAPTION_AVAILIABLE,
@@ -22,7 +33,7 @@ const upscale = async (
   onProgress: (event: UploadEvent) => void,
   imageData: ImageWithData[]
 ): Promise<boolean> =>
-  await postWithEvents<UploadEvent>(
+  await postImagesWithEvents<UploadEvent>(
     '/api/upscale',
     '/api/progressEvents',
     PROGRESS,
@@ -35,7 +46,7 @@ const uploadToSftp = async (
   imageData: ImageWithData[],
   upscaledImagesData?: ImageFileData[]
 ): Promise<boolean> =>
-  await postWithEvents<UploadEvent>(
+  await postImagesWithEvents<UploadEvent>(
     '/api/upload',
     '/api/progressEvents',
     PROGRESS,
@@ -44,7 +55,7 @@ const uploadToSftp = async (
     upscaledImagesData
   );
 
-const postWithEvents = async <TData>(
+const postImagesWithEvents = async <TData>(
   mainEndpoint: string,
   eventEndpointName: string,
   eventName: string,
@@ -62,7 +73,11 @@ const postWithEvents = async <TData>(
   });
 
   try {
-    const response = await post(mainEndpoint, imageData, upscaledImagesData);
+    const response = await postImages(
+      mainEndpoint,
+      imageData,
+      upscaledImagesData
+    );
 
     if (isSuccessResponse(response)) {
       return true;
@@ -77,7 +92,7 @@ const postWithEvents = async <TData>(
   }
 };
 
-const post = async <TData>(
+const postImages = async <TData>(
   url: string,
   imageData: ImageWithData[],
   upscaledImagesData?: ImageFileData[]
@@ -104,4 +119,4 @@ const post = async <TData>(
 const isSuccessResponse = (response: AxiosResponse<unknown, unknown>) =>
   response.status >= 200 && response.status < 300;
 
-export { upscale, uploadToSftp, getCaptions };
+export { uploadCsv, upscale, uploadToSftp, getCaptions };

@@ -7,6 +7,21 @@ interface HelpIconProps extends Styleable {
   iconClassName?: string;
 }
 
+const messages = [
+  'Select the images which you would like to submit to stock.',
+  'Upscale them if needed using the Upscale button and upload to stock using the Upload to FTP button.',
+  'Unless you select some of the images (click on the image), all of them will be processed.',
+  'Click Retrieve tags and captions to get the metadata about the image',
+  '(Imagga for tags, CLIP and PNG chunk info for captions)',
+  'or enter the caption and tags manually.',
+  'Without the selection, only the first image will be used for tag and caption retrieval.',
+  'Either download tags as a file and upload/submit the images manually',
+  'or click Upload tags button to do the processing automatically using Puppeteer.',
+  'You will need a separate Chrome installation (for example, Chrome Canary)',
+  'as Puppeteer cannot work with the currently open instance.',
+  'Before processing images, log in to the stock website (one-time operation).',
+];
+
 const HelpIcon: FunctionComponent<HelpIconProps> = ({
   iconClassName,
   className,
@@ -24,28 +39,15 @@ const HelpIcon: FunctionComponent<HelpIconProps> = ({
         onMouseLeave={() => setShowTooltip(false)}
       />
       {showTooltip && (
-        <div
-          className={
-            'min-w-max bg-gray-100 text-sm text-black border p-2 rounded-lg shadow-md absolute top-full left-full transform -translate-x-full text-center'
-          }
-        >
-          Select the images for which you would like to get the tags.
-          <br />
-          Tags will be downloaded as a CSV file and you will need to upload them
-          to Adobe stock manually.
-          <br />
-          Tags will be applied to all the images regardless of the selection and
-          will be submitted to the stock.
-          <br />
-          Without the selection only the first image will be used for tag
-          retrieval.
-          <div
-            className="absolute top-0 right-1 w-4 h-4"
-            style={{
-              transform: 'translate(-50%, -50%) rotate(45deg)',
-              background: 'inherit',
-            }}
-          />
+        <div className="min-w-max bg-gray-100 text-sm text-black border p-2 rounded-lg shadow-md absolute top-full left-full transform -translate-x-full text-center">
+          {messages.map((message, index) => (
+            <div className="flex" key={index}>
+              <span className="flex-none mr-1">
+                <div className="w-4 h-4 bg-gray-100 transform rotate-45" />
+              </span>
+              <span className="flex-auto">{message}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -5,6 +5,7 @@ interface Caption {
 
 interface CaptionEvent extends Caption {
   fileName: string;
+  isFromFileMetadata: boolean;
 }
 
 export type { Caption, CaptionEvent };

@@ -67,3 +67,17 @@ input[role="combobox"] option::before {
 input[role="combobox"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }
+
+@tailwind base;
+
+@layer base {
+  button {
+    @apply w-full p-2 disabled:bg-slate-500 disabled:cursor-not-allowed bg-teal-500 hover:bg-teal-600;
+  }
+  h2{
+    @apply text-lg
+  }
+  input{
+    @apply w-full p-2 text-black disabled:bg-slate-500 disabled:cursor-not-allowed bg-white;
+  }
+}

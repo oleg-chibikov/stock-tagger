@@ -1,26 +1,26 @@
 import { uploadToSftp, upscale } from '@apiClient/backendApiClient';
-import { ImageWithData } from '@appHelper/fileHelper';
+import {
+  ImageWithData,
+  getNotUploadedImages,
+  getNotUpscaledImages,
+  getUpscaledImages,
+} from '@appHelper/imageHelper';
 import { HelpIcon } from '@components/HelpIcon';
 import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
 import {
   setImages,
   setIsUploadedToFtp,
   setUpscaledUri,
+  triggerNewImages,
 } from '@store/imageSlice';
 import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
+import clsx from 'clsx';
 import { FunctionComponent, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { ProgressLoader, ProgressState } from '../ProgressLoader';
 import { Gallery } from '../core/Gallery';
 import { ImagePicker } from '../core/ImagePicker';
-
-const getNotUpscaledImages = (data: ImageWithData[]) =>
-  data.filter((x) => !x.upscaledUri);
-const getUpscaledImages = (data: ImageWithData[]) =>
-  data.filter((x) => x.upscaledUri);
-const getNotUploadedImages = (data: ImageWithData[]) =>
-  data.filter((x) => !x.uploadedToFtp);
 
 interface MainSectionProps {
   className?: string;
@@ -51,6 +51,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       dispatch(setImages(images));
       dispatch(setTags([]));
       setAllAreUpscaled(false);
+      dispatch(triggerNewImages());
     }
   };
 
@@ -102,7 +103,10 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
 
   return (
     <div
-      className={`${className} w-full p-4 bg-gray-800 flex flex-col justify-center items-center z-40`}
+      className={clsx(
+        'w-full p-4 bg-gray-800 gap-2 flex flex-col justify-center items-center z-40',
+        className
+      )}
     >
       {!isLoading && (
         <div className="flex w-full content-centerr">
@@ -114,7 +118,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       <>
         {Boolean(images.length) && (
           <>
-            <Gallery className="mt-2" uploadProgress={uploadProgress} />
+            <Gallery uploadProgress={uploadProgress} />
             {isLoading && <ProgressLoader uploadProgress={uploadProgress} />}
             {!isLoading && (
               <>
@@ -132,29 +136,26 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
                         }
                       )
                     }
-                    className="w-full mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
                   >
                     Upscale
                   </button>
                 )}
-                {!allAreUploaded && (
-                  <button
-                    onClick={() =>
-                      processImages(
-                        uploadToSftp,
-                        (image) => !image.uploadedToFtp, // upload only those not uploaded
-                        (data) => {
-                          if (data.operation === 'ftp_upload_done') {
-                            dispatch(setIsUploadedToFtp(data));
-                          }
+
+                <button
+                  onClick={() =>
+                    processImages(
+                      uploadToSftp,
+                      (image) => (allAreUploaded ? true : !image.uploadedToFtp), // upload only those not uploaded. However if all are uploaded - reupload everything
+                      (data) => {
+                        if (data.operation === 'ftp_upload_done') {
+                          dispatch(setIsUploadedToFtp(data));
                         }
-                      )
-                    }
-                    className="w-full mt-2 px-2 py-2 bg-teal-500 hover:bg-teal-700"
-                  >
-                    Upload to stock
-                  </button>
-                )}
+                      }
+                    )
+                  }
+                >
+                  {allAreUploaded ? 'Re-upload to stock' : 'Upload to stock'}
+                </button>
               </>
             )}
           </>

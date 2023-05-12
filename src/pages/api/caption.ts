@@ -42,7 +42,7 @@ export default async function handler(
         const textChunks = captioningService.extractTextChunks(buffer);
         for (const chunk of textChunks) {
           console.log('Extracted text chunk: ' + chunk);
-          emitEvent(image, chunk, 1);
+          emitEvent(image, chunk, 1, true);
         }
       });
     }
@@ -75,7 +75,7 @@ export default async function handler(
         for (const result of reverseImageSearchResults
           .flatMap((x) => x)
           .sort((a, b) => b.similarity - a.similarity)) {
-          emitEvent(image, result.caption, result.similarity);
+          emitEvent(image, result.caption, result.similarity, false);
         }
       } finally {
         deleteFile(image.filepath);
@@ -85,11 +85,17 @@ export default async function handler(
     res.status(200).end();
   });
 
-  const emitEvent = (image: File, caption: string, similarity: number) => {
+  const emitEvent = (
+    image: File,
+    caption: string,
+    similarity: number,
+    isFromFileMetadata: boolean
+  ) => {
     eventEmitter.emit(CAPTION_AVAILIABLE, {
       fileName: image.originalFilename,
       caption: caption,
       similarity: similarity,
+      isFromFileMetadata: isFromFileMetadata,
     } as CaptionEvent);
   };
 }

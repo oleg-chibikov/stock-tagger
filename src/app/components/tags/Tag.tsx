@@ -20,11 +20,11 @@ const Tag: FunctionComponent<TagProps> = ({
   isHovered,
 }) => {
   return (
-    <div className="flex items-center cursor-pointer">
+    <div className="flex gap-2 items-center cursor-pointer">
       <div
         className={clsx(
           'flex-1 py-1 px-3 hover:bg-zinc-900',
-          isHovered ? 'bg-red-500' : 'bg-gray-500'
+          isHovered ? 'bg-red-500' : 'bg-teal-900'
         )}
         draggable
       >
@@ -39,9 +39,9 @@ const Tag: FunctionComponent<TagProps> = ({
           {item}
         </span>
       </div>
-      <button
+      <div
         className={clsx(
-          'rounded-r p-1 focus:outline-none transition-colors',
+          'rounded-r focus:outline-none transition-colors',
           index !== hoveredIndex ? 'text-white' : 'text-red-500'
         )}
         onClick={() => handleRemoveTag(index)}
@@ -49,7 +49,7 @@ const Tag: FunctionComponent<TagProps> = ({
         onMouseLeave={() => setHoveredIndex(undefined)}
       >
         <FaTimes size={24} color="currentColor" />
-      </button>
+      </div>
     </div>
   );
 };

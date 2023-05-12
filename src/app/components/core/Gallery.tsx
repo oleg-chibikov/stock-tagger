@@ -51,7 +51,7 @@ const Gallery: FunctionComponent<GalleryProps> = ({
 
   return (
     <div className={clsx('relative', className)}>
-      <div className="w-full flex gap-3 flex-wrap justify-start max-h-96 overflow-y-auto">
+      <div className="w-full flex gap-2 flex-wrap justify-start max-h-96 overflow-y-auto">
         {images.map((image, index) => {
           const progress = uploadProgress[image.name];
           const isLoading = progress && progress.progress < 1;

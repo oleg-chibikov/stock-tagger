@@ -16,6 +16,7 @@ interface ComboBoxProps extends Styleable {
   editable?: boolean;
   listClassName?: string;
   isLoading?: boolean;
+  maxLength?: number;
 }
 const getDisplayNameByValue = (
   items: ComboBoxItem[],
@@ -34,6 +35,7 @@ const ComboBox: FunctionComponent<ComboBoxProps> = ({
   editable = true,
   listClassName,
   className,
+  maxLength,
 }: ComboBoxProps) => {
   const [inputValue, setInputValue] = useState(
     getDisplayNameByValue(items, value)
@@ -71,7 +73,8 @@ const ComboBox: FunctionComponent<ComboBoxProps> = ({
   return (
     <div className="relative w-full h-auto">
       <input
-        className={clsx('w-full py-2 px-3', className)}
+        maxLength={maxLength}
+        className={className}
         onChange={(event) => {
           setInputValue(event.target.value);
           onSelect(event.target.value as StringOrNumber); // StringOrNumber must be string when ComboBox is editable

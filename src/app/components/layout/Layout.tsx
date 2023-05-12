@@ -11,31 +11,24 @@ const Layout: FunctionComponent = () => {
 
   const containerStyles = `
     flex
-    gap-3
+    gap-2
     ${isSmallScreen ? 'flex-col' : 'flex-row'}
     items-start
-    justify-center
     p-${isSmallScreen ? '4' : '8'}
     bg-gray-900
     h-screen
     overflow-x-hidden
   `;
 
-  const mainSectionStyles = `
-    flex-1
-    mr-${isSmallScreen ? '0' : '4'}
-  `;
-
-  const sidePanelStyles = `
-    ${isSmallScreen ? 'w-full' : 'w-2/5'}
-    mt-${isSmallScreen ? '4' : '0'}
-  `;
-
   return (
     <Provider store={store}>
       <div className={containerStyles}>
-        <MainSection className={mainSectionStyles} />
-        <SidePanel className={sidePanelStyles} />
+        <MainSection />
+        <SidePanel
+          className={
+            isSmallScreen ? undefined : 'flex-shrink-0 flex-grow-0 w-1/3'
+          }
+        />
       </div>
     </Provider>
   );

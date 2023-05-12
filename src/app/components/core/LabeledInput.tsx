@@ -34,7 +34,7 @@ const LabeledInput: FunctionComponent<LabeledInputProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={clsx('p-2', inputClassName)}
+        className={inputClassName}
       />
     </div>
   );

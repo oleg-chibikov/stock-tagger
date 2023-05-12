@@ -25,15 +25,17 @@ const Tags: FunctionComponent<TagsProps> = ({ className }) => {
     dispatch(setTags(tags.map((x) => x.id as string)));
 
   return (
-    <div className={clsx('flex flex-col text-xs', className)}>
+    <div className={clsx('flex flex-col gap-2 text-sm', className)}>
       {Boolean(tags.length) && (
         <>
-          <span className="text-lg mb-2">Tags</span>
+          <h2 className="cursor-help" title="Drag and drop to reorder tags">
+            Tags
+          </h2>
           <ReactSortable
             list={mappedTags}
             setList={mappedSetTags}
             tag="div"
-            className="overflow-y-auto flex-1 max-h-80"
+            className="overflow-y-auto flex flex-1 flex-col gap-2 max-h-80"
           >
             {tags.map((tag, index) => (
               <Tag
@@ -47,7 +49,6 @@ const Tags: FunctionComponent<TagsProps> = ({ className }) => {
               />
             ))}
           </ReactSortable>
-          <span className="text-sm mt-2">Drag and drop to reorder tags</span>
         </>
       )}
     </div>

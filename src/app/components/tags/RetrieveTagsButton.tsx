@@ -1,6 +1,6 @@
 import { getCaptions } from '@apiClient/backendApiClient';
 import { uploadImageAndGetTags } from '@apiClient/imaggaApiClient';
-import { Caption } from '@dataTransferTypes/caption';
+import { CaptionEvent } from '@dataTransferTypes/caption';
 import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
 import clsx from 'clsx';
@@ -11,7 +11,7 @@ import { Styleable } from '../Styleable';
 import { Loader } from '../core/Loader';
 
 interface Props extends Styleable {
-  onCaptionRetrieved: (caption: Caption) => void;
+  onCaptionRetrieved: (caption: CaptionEvent) => void;
   onStart: () => void;
   onFinish: () => void;
 }

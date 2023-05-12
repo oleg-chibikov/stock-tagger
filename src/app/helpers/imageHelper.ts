@@ -24,6 +24,13 @@ const getImageData = async (file: File): Promise<ImageWithData> => {
   };
 };
 
+const getNotUpscaledImages = (data: ImageWithData[]) =>
+  data.filter((x) => !x.upscaledUri);
+const getUpscaledImages = (data: ImageWithData[]) =>
+  data.filter((x) => x.upscaledUri);
+const getNotUploadedImages = (data: ImageWithData[]) =>
+  data.filter((x) => !x.uploadedToFtp);
+
 interface ImageWithData {
   name: string;
   uri: string;
@@ -33,4 +40,12 @@ interface ImageWithData {
 }
 
 export type { ImageWithData };
-export { fileToUri, toBase64, toFile, getImageData };
+export {
+  getNotUpscaledImages,
+  getUpscaledImages,
+  getNotUploadedImages,
+  fileToUri,
+  toBase64,
+  toFile,
+  getImageData,
+};

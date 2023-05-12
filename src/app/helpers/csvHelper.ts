@@ -1,4 +1,8 @@
-import { ImageWithData } from './fileHelper';
+import { ImageWithData } from './imageHelper';
+
+const generativeAiTitlePostfix = '. Generative AI';
+const maxTitleLength = 200;
+const maxTitleAiLength = maxTitleLength - generativeAiTitlePostfix.length;
 
 function createCSVData(
   images: ImageWithData[],
@@ -11,7 +15,7 @@ function createCSVData(
   const rows = images.map((image) => {
     return {
       Filename: `"${image.name}"`,
-      Title: `"${title}${isAi ? '. GenerativeAI' : ''}"`,
+      Title: `"${title}${isAi ? generativeAiTitlePostfix : ''}"`,
       Keywords: `"${tags.join(csvSplitter)}"`,
       Category: category?.toString(),
       Releases: '',
@@ -50,4 +54,4 @@ function downloadCSV(
   document.body.removeChild(a);
 }
 
-export { downloadCSV };
+export { maxTitleAiLength, createCSVData, downloadCSV };

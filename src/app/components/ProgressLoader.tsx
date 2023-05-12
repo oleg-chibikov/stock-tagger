@@ -50,7 +50,7 @@ const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
                   style={{ width: `${progress * 100}%` }}
                 />
               </div>
-              <div className="flex whitespace-nowrap justify-end w-60">
+              <div className="flex whitespace-nowrap justify-end">
                 {operationToString(operation)}
               </div>
             </div>

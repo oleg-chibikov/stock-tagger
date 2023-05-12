@@ -1,15 +1,17 @@
 import { UploadEvent } from '@dataTransferTypes/upload';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ImageWithData } from '../helpers/fileHelper';
+import { ImageWithData } from '../helpers/imageHelper';
 
 interface ImageState {
   images: ImageWithData[];
   selectedImages: Set<string>;
+  newImagesTrigger: boolean;
 }
 
 const initialState: ImageState = {
   images: [],
   selectedImages: new Set<string>(),
+  newImagesTrigger: false,
 };
 
 const imageSlice = createSlice({
@@ -39,6 +41,9 @@ const imageSlice = createSlice({
         image.uploadedToFtp = true;
       }
     },
+    triggerNewImages: (state) => {
+      state.newImagesTrigger = !state.newImagesTrigger;
+    },
   },
 });
 
@@ -47,5 +52,6 @@ export const {
   setUpscaledUri,
   setIsUploadedToFtp,
   toggleSelection,
+  triggerNewImages,
 } = imageSlice.actions;
 export default imageSlice.reducer;
