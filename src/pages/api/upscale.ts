@@ -16,8 +16,6 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
   const eventEmitter = Container.get(EventEmitter);
 
   processRequestWithFiles(req, res, async (_fields, files) => {
-    throw new Error('sdfds');
-
     const upscaleImage = async (image: File): Promise<void> => {
       try {
         emitEvent(image.originalFilename as string, 0.1, 'upscale');
