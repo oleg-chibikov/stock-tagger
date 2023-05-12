@@ -104,14 +104,14 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
   return (
     <div
       className={clsx(
-        'w-full p-4 bg-gray-800 gap-2 flex flex-col justify-center items-center z-40',
+        'w-full p-4 bg-gray-800 gap-4 flex flex-col justify-center items-center z-40',
         className
       )}
     >
       {!isLoading && (
-        <div className="flex w-full content-centerr">
+        <div className="flex gap-2 w-full">
           <ImagePicker className="w-full" onSelect={processUploadedImages} />
-          <HelpIcon className="ml-2 z-30" />
+          <HelpIcon className="z-30" />
         </div>
       )}
 

@@ -29,27 +29,28 @@ const HelpIcon: FunctionComponent<HelpIconProps> = ({
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
-    <div className={clsx('self-center relative inline-block', className)}>
-      <FaInfoCircle
-        className={clsx(
-          'w-10 h-10 cursor-pointer text-teal-500',
-          iconClassName
-        )}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      />
-      {showTooltip && (
-        <div className="min-w-max bg-gray-100 text-sm text-black border p-2 rounded-lg shadow-md absolute top-full left-full transform -translate-x-full text-center">
-          {messages.map((message, index) => (
-            <div className="flex" key={index}>
-              <span className="flex-none mr-1">
-                <div className="w-4 h-4 bg-gray-100 transform rotate-45" />
-              </span>
-              <span className="flex-auto">{message}</span>
+    <div className={className}>
+      <div className="relative">
+        <FaInfoCircle
+          className={clsx(
+            'w-10 h-10 cursor-pointer text-teal-500',
+            iconClassName
+          )}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        />
+        {showTooltip && (
+          <>
+            <div className="min-w-max bg-gray-100 text-sm text-black border p-2 rounded-lg shadow-md absolute top-full left-full transform -translate-x-full text-center">
+              {messages.map((message, index) => (
+                <div className="flex" key={index}>
+                  <span className="flex-auto">{message}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

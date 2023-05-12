@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { ChangeEvent, FunctionComponent } from 'react';
+import { ChangeEvent, FunctionComponent, useState } from 'react';
 import { ImageWithData, getImageData } from '../../helpers/imageHelper';
 import { Styleable } from '../Styleable';
 
@@ -11,8 +11,43 @@ const ImagePicker: FunctionComponent<ImagePickerProps> = ({
   onSelect,
   className,
 }) => {
+  const [dragStatus, setDragStatus] = useState(false);
+
   const handleInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
+    processFiles(event.target.files);
+  };
+
+  const handleDrag = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleDragIn = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragStatus(true);
+  };
+
+  const handleDragOut = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    // Ignore the event if the relatedTarget is a descendant of the drag and drop area
+    if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+      setDragStatus(false);
+    }
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragStatus(false);
+    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+      processFiles(event.dataTransfer.files);
+      event.dataTransfer.clearData();
+    }
+  };
+
+  const processFiles = async (files: FileList | null) => {
     if (files && files.length > 0) {
       const selectedImageData = await Promise.all(
         Array.from(files).map(getImageData)
@@ -24,13 +59,19 @@ const ImagePicker: FunctionComponent<ImagePickerProps> = ({
   };
 
   return (
-    <div className={clsx('flex flex-col items-center space-y-2', className)}>
+    <div
+      className={clsx(
+        'flex flex-col items-center space-y-2 select-none',
+        className
+      )}
+    >
       <label
         htmlFor="image-input"
-        className="w-full bg-teal-500 hover:bg-teal-700 py-2 px-2 flex justify-center"
+        className="w-full bg-teal-500 hover:bg-teal-700 p-2 flex justify-center"
       >
         Select Images
       </label>
+      <h3>or</h3>
       <input
         type="file"
         id="image-input"
@@ -39,6 +80,20 @@ const ImagePicker: FunctionComponent<ImagePickerProps> = ({
         className="hidden"
         onChange={handleInputChange}
       />
+      <div
+        onDragEnter={handleDragIn}
+        onDragLeave={handleDragOut}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+        className={clsx(
+          'w-full flex justify-center items-center p-2 h-32 border-dashed border-4 border-teal-500 transition-colors duration-200 ease-in-out rounded-lg',
+          dragStatus
+            ? ' bg-teal-300 bg-opacity-30'
+            : 'bg-opacity-10 bg-teal-300'
+        )}
+      >
+        <p className="text-lg text-white font-bold">Drop your files here</p>
+      </div>
     </div>
   );
 };

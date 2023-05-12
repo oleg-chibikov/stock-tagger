@@ -67,7 +67,7 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className }) => {
 
   return (
     <div
-      className={clsx('bg-gray-800 flex flex-col gap-2 p-4 w-full', className)}
+      className={clsx('bg-gray-800 flex flex-col gap-4 p-4 w-full', className)}
     >
       <LabeledPicker
         labelClassName="w-28"
