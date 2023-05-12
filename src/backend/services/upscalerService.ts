@@ -2,6 +2,7 @@ import {
   getActivateCondaCommand,
   runCommands,
 } from '@backendHelpers/commandHelper';
+import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import * as path from 'path';
 import { Service } from 'typedi';
 
@@ -25,6 +26,7 @@ class UpscalerService {
   }
 
   async upscale(
+    modelName: UpscaleModel,
     inputFilePath: string,
     outputDirectory: string,
     fileName: string
@@ -32,14 +34,19 @@ class UpscalerService {
     console.log(
       `Upscaling ${fileName} (${inputFilePath}) and saving it as ${outputDirectory}...`
     );
+
+    const modelPath = path.join(
+      'src',
+      'backend',
+      'upscale',
+      `${modelName}.pth`
+    );
     await runCommands([
       getActivateCondaCommand(),
       `python "${path.join(
         process.env.ESRGAN_PATH as string,
         'inference_realesrgan.py'
-      )}" --input "${inputFilePath}" --output "${outputDirectory}" --model_path ${
-        process.env.ESRGAN_MODEL_FILE_PATH as string
-      } --tile 256`,
+      )}" --input "${inputFilePath}" --output "${outputDirectory}" --model_path "${modelPath}" --tile 256`,
     ]);
     console.log(`Finished upscaling ${fileName}`);
     const parsed = path.parse(fileName);

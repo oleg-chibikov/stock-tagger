@@ -75,10 +75,10 @@ const ComboBox: FunctionComponent<ComboBoxProps> = ({
       );
 
   return (
-    <div className="relative w-full h-auto">
+    <div className={clsx('flex relative w-full h-auto', className)}>
       <textarea
         maxLength={maxLength}
-        className={clsx(isResizable ? undefined : 'resize-none', className)}
+        className={isResizable ? undefined : 'resize-none'}
         rows={rows}
         onChange={(event) => {
           setInputValue(event.target.value);

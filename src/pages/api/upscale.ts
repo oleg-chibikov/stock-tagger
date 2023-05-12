@@ -7,6 +7,7 @@ import { deleteFile } from '@backendHelpers/fsHelper';
 import { outputDirectory, toWebUrl } from '@backendHelpers/uploadHelper';
 import { PROGRESS } from '@dataTransferTypes/event';
 import { UploadEvent, UploadOperation } from '@dataTransferTypes/upload';
+import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import { UpscalerService } from '@services/upscalerService';
 import EventEmitter from 'events';
 import { File } from 'formidable';
@@ -18,11 +19,12 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
   const upscalerService = Container.get(UpscalerService);
   const eventEmitter = Container.get(EventEmitter);
 
-  processRequestWithFiles(req, res, async (_fields, files) => {
+  processRequestWithFiles(req, res, async (fields, files) => {
     const upscaleImage = async (image: File): Promise<void> => {
       try {
         emitEvent(image.originalFilename as string, 0.1, 'upscale');
         const outputFilePath = await upscalerService.upscale(
+          fields.modelName as UpscaleModel,
           image.filepath,
           outputDirectory,
           image.newFilename

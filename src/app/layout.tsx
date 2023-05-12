@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'Stock tagger',
-  description: 'A program to easily upload images to the stock',
+  description: 'A program to easily upload images to stock',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

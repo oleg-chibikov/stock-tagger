@@ -38,6 +38,7 @@ const uploadToSftp = async (req: NextApiRequest, res: NextApiResponse) => {
           );
           emitEvent(image.fileName as string, 1, 'ftp_upload_done');
         } catch (err: unknown) {
+          console.log('Error uploading to SFTP: ' + err);
           emitEvent(image.fileName, 1, 'ftp_upload_error');
         } finally {
           // deleteFile(image.filePath);

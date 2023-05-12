@@ -139,12 +139,13 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className }) => {
                   disabled={!isReadyToSubmit}
                   onClick={uploadTagsAndSubmitImages}
                 >
-                  Upload tags and submit images to Adobe Stock
+                  Upload tags and submit images to stock
                 </button>
 
                 {!isReadyToSubmit && (
                   <button
-                    title="I want to upload tags anyway (the images are already uploaded to the stock)"
+                    className="w-10 h-10 flex justify-center items-center"
+                    title="I want to upload tags anyway (the images are already uploaded to stock)"
                     onClick={() => setIsReadyToSumbit(true)}
                   >
                     <FaCheck />

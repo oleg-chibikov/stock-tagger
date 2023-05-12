@@ -37,10 +37,8 @@ const apiHandler = (handler: ApiMethodHandlers) => {
         );
 
       // call method handler
-      console.log('Send it');
       await methodHandler(req, res);
     } catch (err) {
-      console.log('AAAAAAAA');
       // global error handler
       errorHandler(err, res);
     }

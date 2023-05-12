@@ -1,6 +1,7 @@
 import { CaptionEvent } from '@dataTransferTypes/caption';
 import { CAPTION_AVAILIABLE, PROGRESS } from '@dataTransferTypes/event';
 import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
+import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import axios, { AxiosResponse } from 'axios';
 import { ImageWithData, toFile } from '../helpers/imageHelper';
 
@@ -29,20 +30,23 @@ const getCaptions = async (
 
 const upscale = async (
   onProgress: (event: UploadEvent) => void,
-  imageData: ImageWithData[]
+  imageData: ImageWithData[],
+  modelName: UpscaleModel
 ): Promise<void> =>
   await postImagesWithEvents<UploadEvent>(
     '/api/upscale',
     '/api/progressEvents',
     PROGRESS,
     onProgress,
-    imageData
+    imageData,
+    undefined,
+    { modelName: modelName }
   );
 
 const uploadToSftp = async (
   onProgress: (event: UploadEvent) => void,
   imageData: ImageWithData[],
-  upscaledImagesData?: ImageFileData[]
+  upscaledImagesData: ImageFileData[]
 ): Promise<void> =>
   await postImagesWithEvents<UploadEvent>(
     '/api/upload',
@@ -59,7 +63,8 @@ const postImagesWithEvents = async <TData>(
   eventName: string,
   onEvent: (data: TData) => void,
   imageData: ImageWithData[],
-  upscaledImagesData?: ImageFileData[]
+  upscaledImagesData?: ImageFileData[],
+  data?: Record<string, string>
 ): Promise<void> => {
   // Create a new EventSource to listen for SSE from the events route
   const eventSource = new EventSource(eventEndpointName);
@@ -73,7 +78,8 @@ const postImagesWithEvents = async <TData>(
     const response = await postImages(
       mainEndpoint,
       imageData,
-      upscaledImagesData
+      upscaledImagesData,
+      data
     );
 
     if (!isSuccessResponse(response)) {
@@ -87,7 +93,8 @@ const postImagesWithEvents = async <TData>(
 const postImages = async <TData>(
   url: string,
   imageData: ImageWithData[],
-  upscaledImagesData?: ImageFileData[]
+  upscaledImagesData?: ImageFileData[],
+  data?: Record<string, string>
 ): Promise<AxiosResponse<TData, unknown>> => {
   console.log(
     `Posting ${imageData.length} original images and ${
@@ -100,6 +107,12 @@ const postImages = async <TData>(
   });
   if (upscaledImagesData?.length) {
     formData.append('upscaledImagesData', JSON.stringify(upscaledImagesData));
+  }
+  if (data) {
+    for (const [key, value] of Object.entries(data)) {
+      console.log(`Data added to request: ${key}: ${value}`);
+      formData.append(key, value);
+    }
   }
   return await axios.post(url, formData, {
     headers: {

@@ -11,7 +11,7 @@ export class SftpService {
     fileName: string,
     onProgress: (fileName: string, progress: number) => void // Add a file parameter to the callback
   ) {
-    console.log(`Uploading ${filePath} to sftp...`);
+    console.log(`Uploading ${filePath} to SFTP...`);
     // Define the local and remote paths for the file
     const localPath = filePath;
     const remotePath = fileName;
