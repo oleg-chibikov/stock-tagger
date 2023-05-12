@@ -1,9 +1,12 @@
 import { apiHandler } from '@backendHelpers/apiHelper';
-import { processRequestWithFiles } from '@backendHelpers/formidableHelper';
+import {
+  getFilesFromRequest,
+  processRequestWithFiles,
+} from '@backendHelpers/formidableHelper';
+import { deleteFile } from '@backendHelpers/fsHelper';
 import { outputDirectory, toWebUrl } from '@backendHelpers/uploadHelper';
 import { PROGRESS } from '@dataTransferTypes/event';
 import { UploadEvent, UploadOperation } from '@dataTransferTypes/upload';
-import { deleteFile, getFilesFromRequest } from '@services/helper';
 import { UpscalerService } from '@services/upscalerService';
 import EventEmitter from 'events';
 import { File } from 'formidable';

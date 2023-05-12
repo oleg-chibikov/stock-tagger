@@ -78,6 +78,8 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className }) => {
         maxLength={maxTitleAiLength}
         className="z-20"
         isLoading={areCaptionsLoading}
+        rows={3}
+        isResizable={true}
       />
       <LabeledPicker
         editable={false}

@@ -42,7 +42,9 @@ interface Tag {
 //   return new Promise((resolve) => setTimeout(resolve, ms));
 // }
 
-async function uploadImageAndGetTags(imageData: ImageWithData): Promise<Tag[]> {
+const uploadImageAndGetTags = async (
+  imageData: ImageWithData
+): Promise<Tag[]> => {
   const apiKey = process.env.NEXT_PUBLIC_IMAGGA_KEY;
   const apiSecret = process.env.NEXT_PUBLIC_IMAGGA_SECRET;
   console.log(apiKey);
@@ -75,6 +77,6 @@ async function uploadImageAndGetTags(imageData: ImageWithData): Promise<Tag[]> {
   //     en: tag,
   //   },
   // }));
-}
+};
 
 export { uploadImageAndGetTags };

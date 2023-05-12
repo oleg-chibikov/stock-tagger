@@ -1,5 +1,8 @@
 import { apiHandler } from '@backendHelpers/apiHelper';
-import { processRequestWithFiles } from '@backendHelpers/formidableHelper';
+import {
+  getFilesFromRequest,
+  processRequestWithFiles,
+} from '@backendHelpers/formidableHelper';
 import { toServerUrl } from '@backendHelpers/uploadHelper';
 import { PROGRESS } from '@dataTransferTypes/event';
 import {
@@ -7,7 +10,6 @@ import {
   UploadEvent,
   UploadOperation,
 } from '@dataTransferTypes/upload';
-import { getFilesFromRequest } from '@services/helper';
 import { SftpService } from '@services/sftpService';
 import EventEmitter from 'events';
 import { NextApiRequest, NextApiResponse } from 'next';

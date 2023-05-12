@@ -1,13 +1,12 @@
+import {
+  getActivateCondaCommand,
+  runCommands,
+} from '@backendHelpers/commandHelper';
+import { sanitize } from '@backendHelpers/promptHelper';
 import path from 'path';
 import text from 'png-chunk-text';
 import extractChunks from 'png-chunks-extract';
 import { Service } from 'typedi';
-import {
-  capitalize,
-  getActivateCondaCommand,
-  removeEndingDot,
-  runCommands,
-} from './helper';
 
 interface CaptioningResult {
   caption: string;
@@ -61,7 +60,7 @@ class CaptioningService {
           ? parseFloat(similarityText.substring(0, similarityText.length - 2))
           : 0;
         return {
-          caption: this.sanitize(string),
+          caption: sanitize(string),
           similarity,
         } as CaptioningResult;
       });
@@ -76,20 +75,9 @@ class CaptioningService {
       .map((x) => x.text);
 
     console.log(`${textChunks.length} text chunks`);
-    const targetString = 'Negative prompt:';
-    const result: string[] = [];
 
-    for (const text of textChunks) {
-      const targetIndex = text.indexOf(targetString);
-      const extractedText =
-        targetIndex !== -1 ? text.slice(0, targetIndex) : text;
-      result.push(this.sanitize(extractedText));
-    }
-
-    return result;
+    return textChunks.map(sanitize);
   };
-
-  private sanitize = (s: string) => removeEndingDot(capitalize(s.trim()));
 
   private getCaptioningDirectory = (localPath: string) =>
     path.join('src', 'backend', 'captioning', localPath);

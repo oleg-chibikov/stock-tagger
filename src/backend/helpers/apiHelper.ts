@@ -17,7 +17,7 @@ type ApiMethodHandlers = {
   [key in Uppercase<Method>]?: NextApiHandler;
 };
 
-export const apiHandler = (handler: ApiMethodHandlers) => {
+const apiHandler = (handler: ApiMethodHandlers) => {
   return async (req: NextApiRequest, res: NextApiResponse<ErrorResponse>) => {
     try {
       const method = req.method
@@ -47,7 +47,7 @@ export const apiHandler = (handler: ApiMethodHandlers) => {
   };
 };
 
-function errorHandler(err: unknown, res: NextApiResponse<ErrorResponse>) {
+const errorHandler = (err: unknown, res: NextApiResponse<ErrorResponse>) => {
   // Errors with statusCode >= 500 are should not be exposed
   if (createHttpError.isHttpError(err) && err.expose) {
     // Handle all errors thrown by http-errors module
@@ -63,4 +63,6 @@ function errorHandler(err: unknown, res: NextApiResponse<ErrorResponse>) {
       status: createHttpError.isHttpError(err) ? err.statusCode : 500,
     });
   }
-}
+};
+
+export { apiHandler };

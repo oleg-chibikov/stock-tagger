@@ -8,7 +8,7 @@ import { Styleable } from '../core/Styleable';
 
 interface Props extends Styleable {}
 
-export function NewTag({ className }: Props) {
+const NewTag = ({ className }: Props) => {
   const dispatch = useDispatch();
   const [newTag, setNewTag] = useState('');
   const tags = useAppSelector((state) => state.tag.tags);
@@ -54,4 +54,6 @@ export function NewTag({ className }: Props) {
       </button>
     </div>
   );
-}
+};
+
+export { NewTag };

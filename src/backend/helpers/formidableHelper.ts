@@ -1,4 +1,4 @@
-import { Fields, Files, IncomingForm } from 'formidable';
+import { Fields, File, Files, IncomingForm } from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const processRequestWithFiles = (
@@ -26,4 +26,11 @@ const processRequestWithFiles = (
   });
 };
 
-export { processRequestWithFiles };
+const getFilesFromRequest = (files: Files): File[] => {
+  if (!files) {
+    return [];
+  }
+  return Object.values(files).flatMap((x) => x);
+};
+
+export { processRequestWithFiles, getFilesFromRequest };

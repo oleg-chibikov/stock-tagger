@@ -8,5 +8,5 @@ const streamCaptionEvents = (_req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default apiHandler({
-  POST: streamCaptionEvents,
+  GET: streamCaptionEvents,
 });

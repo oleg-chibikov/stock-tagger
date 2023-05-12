@@ -4,13 +4,13 @@ const generativeAiTitlePostfix = '. Generative AI';
 const maxTitleLength = 200;
 const maxTitleAiLength = maxTitleLength - generativeAiTitlePostfix.length;
 
-function createCSVData(
+const createCSVData = (
   images: ImageWithData[],
   tags: string[],
   title: string,
   isAi: boolean,
   category?: number
-): string {
+): string => {
   const csvSplitter = ',';
   const rows = images.map((image) => {
     return {
@@ -30,15 +30,15 @@ function createCSVData(
     rows.map((row) => Object.values(row).join(csvSplitter)).join('\n');
 
   return csvData;
-}
+};
 
-function downloadCSV(
+const downloadCSV = (
   images: ImageWithData[],
   tags: string[],
   title: string,
   isAi: boolean,
   category?: number
-) {
+) => {
   const csvData = createCSVData(images, tags, title, isAi, category);
 
   // Create a Blob from the CSV data
@@ -52,6 +52,6 @@ function downloadCSV(
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-}
+};
 
 export { maxTitleAiLength, createCSVData, downloadCSV };

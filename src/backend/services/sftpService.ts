@@ -6,7 +6,6 @@ export class SftpService {
   // Inject the sftp client as a dependency
   constructor(private sftp: Client) {}
 
-  // Make the function a method of the class
   public async uploadToSftp(
     filePath: string,
     fileName: string,
@@ -33,7 +32,6 @@ export class SftpService {
         onProgress(fileName, progress); // Pass the file parameter to the callback
       },
     });
-    // Do something after each file is uploaded
     console.log(`Upload successful for ${fileName}`);
   }
 }

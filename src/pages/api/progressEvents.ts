@@ -8,5 +8,5 @@ const streamProgressEvents = (_req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default apiHandler({
-  POST: streamProgressEvents,
+  GET: streamProgressEvents,
 });

@@ -1,9 +1,7 @@
+import { apiHandler } from '@backendHelpers/apiHelper';
+import { getCondaPath, runCommands } from '@backendHelpers/commandHelper';
+import { createOrClearFolder } from '@backendHelpers/fsHelper';
 import { CaptioningService } from '@services/captioningService';
-import {
-  createOrClearFolder,
-  getCondaPath,
-  runCommands,
-} from '@services/helper';
 import { UpscalerService } from '@services/upscalerService';
 import EventEmitter from 'events';
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -134,11 +132,11 @@ const bootHandler = async () => {
   return Array.from(bootedServices);
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+const boot = async (_req: NextApiRequest, res: NextApiResponse) => {
   const bootedServices = await bootHandler();
-
   res.status(200).json({ bootedServices });
-}
+};
+
+export default apiHandler({
+  GET: boot,
+});

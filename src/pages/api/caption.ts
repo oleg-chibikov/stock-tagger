@@ -1,9 +1,12 @@
 import { apiHandler } from '@backendHelpers/apiHelper';
-import { processRequestWithFiles } from '@backendHelpers/formidableHelper';
+import {
+  getFilesFromRequest,
+  processRequestWithFiles,
+} from '@backendHelpers/formidableHelper';
+import { deleteFile } from '@backendHelpers/fsHelper';
 import { CaptionEvent } from '@dataTransferTypes/caption';
 import { CAPTION_AVAILIABLE } from '@dataTransferTypes/event';
 import { CaptioningService } from '@services/captioningService';
-import { deleteFile, getFilesFromRequest } from '@services/helper';
 import EventEmitter from 'events';
 import { File } from 'formidable';
 import { readFile } from 'fs';

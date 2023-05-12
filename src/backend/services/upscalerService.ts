@@ -1,6 +1,9 @@
+import {
+  getActivateCondaCommand,
+  runCommands,
+} from '@backendHelpers/commandHelper';
 import * as path from 'path';
 import { Service } from 'typedi';
-import { getActivateCondaCommand, runCommands } from './helper';
 
 @Service()
 class UpscalerService {
