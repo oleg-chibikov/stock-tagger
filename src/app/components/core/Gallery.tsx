@@ -36,6 +36,7 @@ const ImageMarkers: FunctionComponent<ImageMarkersProps> = ({
 );
 
 const errorStates = ['ftp_upload_error', 'upscale_error'];
+const doneStates = ['ftp_upload_done', 'upscale_done'];
 
 const Gallery: FunctionComponent<GalleryProps> = ({
   uploadProgress,
@@ -54,20 +55,28 @@ const Gallery: FunctionComponent<GalleryProps> = ({
       <div className="w-full flex gap-2 flex-wrap justify-start max-h-96 overflow-y-auto">
         {images.map((image, index) => {
           const progress = uploadProgress[image.name];
-          const isLoading = progress && progress.progress < 1;
-          const isUpscaled = image.upscaledUri !== undefined;
-          const isSelected = selectedImages.has(image.name);
           const isError = progress
             ? errorStates.includes(progress.operation)
             : false;
-          const isFinished = progress?.operation === 'ftp_upload_done';
+          const isCurrentOperationFinished = progress
+            ? doneStates.includes(progress.operation)
+            : false;
+          const isLoading =
+            progress &&
+            progress.progress < 1 &&
+            !isError &&
+            !isCurrentOperationFinished;
+          const isUpscaled = image.upscaledUri !== undefined;
+          const isSelected = selectedImages.has(image.name);
+          const areAllOperationsFinished =
+            progress?.operation === 'ftp_upload_done';
 
           const children = (
             <ImageMarkers isSelected={isSelected} isUpscaled={isUpscaled} />
           );
 
           let className: string | undefined;
-          if (isFinished) {
+          if (areAllOperationsFinished) {
             className = 'border-green-500 border-8';
           } else if (isError) {
             className = 'border-red-500 border-8';
