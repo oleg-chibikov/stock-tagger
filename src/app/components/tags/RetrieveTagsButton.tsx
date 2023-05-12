@@ -7,8 +7,8 @@ import clsx from 'clsx';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { getUniqueTags } from '../../helpers/tagHelper';
-import { Styleable } from '../Styleable';
 import { Loader } from '../core/Loader';
+import { Styleable } from '../core/Styleable';
 
 interface Props extends Styleable {
   onCaptionRetrieved: (caption: CaptionEvent) => void;

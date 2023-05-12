@@ -1,4 +1,4 @@
-import { Styleable } from '@components/Styleable';
+import { Styleable } from '@components/core/Styleable';
 import clsx from 'clsx';
 import React, { FunctionComponent, useEffect, useState } from 'react';
 type StringOrNumber = string | number | null;

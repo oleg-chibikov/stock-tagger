@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { maxTags } from '../../helpers/tagHelper';
-import { Styleable } from '../Styleable';
+import { Styleable } from '../core/Styleable';
 
 interface Props extends Styleable {}
 

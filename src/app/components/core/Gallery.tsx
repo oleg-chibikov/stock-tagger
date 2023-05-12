@@ -1,5 +1,5 @@
-import { ProgressState } from '@components/ProgressLoader';
-import { Styleable } from '@components/Styleable';
+import { ProgressState } from '@components/core/ProgressLoader';
+import { Styleable } from '@components/core/Styleable';
 import { toggleSelection } from '@store/imageSlice';
 import { useAppSelector } from '@store/store';
 import clsx from 'clsx';

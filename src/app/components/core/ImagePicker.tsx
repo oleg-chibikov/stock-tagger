@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { ChangeEvent, FunctionComponent, useState } from 'react';
 import { ImageWithData, getImageData } from '../../helpers/imageHelper';
-import { Styleable } from '../Styleable';
+import { Styleable } from './Styleable';
 
 interface ImagePickerProps extends Styleable {
   onSelect: (images: ImageWithData[] | null) => void;

@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { FunctionComponent } from 'react';
-import { Styleable } from '../Styleable';
+import { Styleable } from './Styleable';
 
 interface LabeledInputProps extends Styleable {
   label: string;

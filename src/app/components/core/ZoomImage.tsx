@@ -1,4 +1,4 @@
-import { Styleable } from '@components/Styleable';
+import { Styleable } from '@components/core/Styleable';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { FunctionComponent, ReactNode, useEffect, useState } from 'react';

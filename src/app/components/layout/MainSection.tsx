@@ -5,7 +5,7 @@ import {
   getNotUpscaledImages,
   getUpscaledImages,
 } from '@appHelper/imageHelper';
-import { HelpIcon } from '@components/HelpIcon';
+import { HelpIcon } from '@components/core/HelpIcon';
 import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
 import {
   setImages,
@@ -18,9 +18,24 @@ import { setTags } from '@store/tagSlice';
 import clsx from 'clsx';
 import { FunctionComponent, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { ProgressLoader, ProgressState } from '../ProgressLoader';
 import { Gallery } from '../core/Gallery';
 import { ImagePicker } from '../core/ImagePicker';
+import { ProgressLoader, ProgressState } from '../core/ProgressLoader';
+
+const messages = [
+  'Select the images which you would like to submit to stock.',
+  'Upscale them if needed using the Upscale button and upload to stock using the Upload to FTP button.',
+  'Unless you select some of the images (click on the image), all of them will be processed.',
+  'Click Retrieve tags and captions to get the metadata about the image',
+  '(Imagga for tags, CLIP and PNG chunk info for captions)',
+  'or enter the caption and tags manually.',
+  'Without the selection, only the first image will be used for tag and caption retrieval.',
+  'Either download tags as a file and upload/submit the images manually',
+  'or click Upload tags button to do the processing automatically using Puppeteer.',
+  'You will need a separate Chrome installation (for example, Chrome Canary)',
+  'as Puppeteer cannot work with the currently open instance.',
+  'Before processing images, log in to the stock website (one-time operation).',
+];
 
 interface MainSectionProps {
   className?: string;
@@ -111,7 +126,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       {!isLoading && (
         <div className="flex gap-2 w-full">
           <ImagePicker className="w-full" onSelect={processUploadedImages} />
-          <HelpIcon className="z-30" />
+          <HelpIcon className="z-30" messages={messages} />
         </div>
       )}
 
