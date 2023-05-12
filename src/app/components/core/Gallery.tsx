@@ -8,10 +8,6 @@ import { useDispatch } from 'react-redux';
 import { LoaderOverlay } from './LoaderOverlay';
 import { ZoomImage } from './ZoomImage';
 
-interface GalleryProps extends Styleable {
-  uploadProgress: Record<string, ProgressState>;
-}
-
 interface ImageMarkersProps {
   isSelected: boolean;
   isUpscaled: boolean;
@@ -38,9 +34,15 @@ const ImageMarkers: FunctionComponent<ImageMarkersProps> = ({
 const errorStates = ['ftp_upload_error', 'upscale_error'];
 const doneStates = ['ftp_upload_done', 'upscale_done'];
 
+interface GalleryProps extends Styleable {
+  uploadProgress: Record<string, ProgressState>;
+  isLoading: boolean;
+}
+
 const Gallery: FunctionComponent<GalleryProps> = ({
   uploadProgress,
   className,
+  isLoading,
 }) => {
   const images = useAppSelector((state) => state.image.images);
   const selectedImages = useAppSelector((state) => state.image.selectedImages);
@@ -61,7 +63,8 @@ const Gallery: FunctionComponent<GalleryProps> = ({
           const isCurrentOperationFinished = progress
             ? doneStates.includes(progress.operation)
             : false;
-          const isLoading =
+          const showLoading =
+            isLoading &&
             progress &&
             progress.progress < 1 &&
             !isError &&
@@ -97,7 +100,7 @@ const Gallery: FunctionComponent<GalleryProps> = ({
 
           return (
             <div key={index}>
-              {isLoading ? (
+              {showLoading ? (
                 <LoaderOverlay>{zoomImage}</LoaderOverlay>
               ) : (
                 zoomImage

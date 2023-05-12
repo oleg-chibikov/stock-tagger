@@ -4,8 +4,6 @@ import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
 import axios, { AxiosResponse } from 'axios';
 import { ImageWithData, toFile } from '../helpers/imageHelper';
 
-// TODO: handle errors in this file and show them in popup
-
 const uploadCsv = async (fileContent: string) => {
   const url = 'https://contributor.stock.adobe.com/en/uploads';
 
@@ -20,7 +18,7 @@ const uploadCsv = async (fileContent: string) => {
 const getCaptions = async (
   onProgress: (event: CaptionEvent) => void,
   imageData: ImageWithData[]
-): Promise<boolean> =>
+): Promise<void> =>
   await postImagesWithEvents<CaptionEvent>(
     '/api/caption',
     '/api/captionEvents',
@@ -32,7 +30,7 @@ const getCaptions = async (
 const upscale = async (
   onProgress: (event: UploadEvent) => void,
   imageData: ImageWithData[]
-): Promise<boolean> =>
+): Promise<void> =>
   await postImagesWithEvents<UploadEvent>(
     '/api/upscale',
     '/api/progressEvents',
@@ -45,7 +43,7 @@ const uploadToSftp = async (
   onProgress: (event: UploadEvent) => void,
   imageData: ImageWithData[],
   upscaledImagesData?: ImageFileData[]
-): Promise<boolean> =>
+): Promise<void> =>
   await postImagesWithEvents<UploadEvent>(
     '/api/upload',
     '/api/progressEvents',
@@ -62,31 +60,25 @@ const postImagesWithEvents = async <TData>(
   onEvent: (data: TData) => void,
   imageData: ImageWithData[],
   upscaledImagesData?: ImageFileData[]
-): Promise<boolean> => {
+): Promise<void> => {
   // Create a new EventSource to listen for SSE from the events route
   const eventSource = new EventSource(eventEndpointName);
-
-  eventSource.addEventListener(eventName, (event) => {
-    const data = JSON.parse(event.data) as TData;
-    console.log(`Received ${eventName} event: ${event.data}`);
-    onEvent(data);
-  });
-
   try {
+    eventSource.addEventListener(eventName, (event) => {
+      const data = JSON.parse(event.data) as TData;
+      console.log(`Received ${eventName} event: ${event.data}`);
+      onEvent(data);
+    });
+
     const response = await postImages(
       mainEndpoint,
       imageData,
       upscaledImagesData
     );
 
-    if (isSuccessResponse(response)) {
-      return true;
-    } else {
-      return false;
+    if (!isSuccessResponse(response)) {
+      throw response.data;
     }
-  } catch (error) {
-    console.error(error);
-    return false;
   } finally {
     eventSource.close();
   }

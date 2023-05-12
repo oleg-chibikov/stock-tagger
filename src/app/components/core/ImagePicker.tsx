@@ -1,15 +1,17 @@
 import clsx from 'clsx';
-import { ChangeEvent, FunctionComponent, useState } from 'react';
+import { ChangeEvent, FunctionComponent, ReactNode, useState } from 'react';
 import { ImageWithData, getImageData } from '../../helpers/imageHelper';
 import { Styleable } from './Styleable';
 
 interface ImagePickerProps extends Styleable {
   onSelect: (images: ImageWithData[] | null) => void;
+  children?: ReactNode;
 }
 
 const ImagePicker: FunctionComponent<ImagePickerProps> = ({
   onSelect,
   className,
+  children,
 }) => {
   const [dragStatus, setDragStatus] = useState(false);
 
@@ -65,12 +67,15 @@ const ImagePicker: FunctionComponent<ImagePickerProps> = ({
         className
       )}
     >
-      <label
-        htmlFor="image-input"
-        className="w-full bg-teal-500 hover:bg-teal-700 p-2 flex justify-center"
-      >
-        Select Images
-      </label>
+      <div className="flex gap-2 w-full">
+        <label
+          htmlFor="image-input"
+          className="w-full bg-teal-500 hover:bg-teal-700 p-2 flex justify-center"
+        >
+          Select Images
+        </label>
+        {children}
+      </div>
       <h3>or</h3>
       <input
         type="file"

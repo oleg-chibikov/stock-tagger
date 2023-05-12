@@ -1,5 +1,5 @@
 import { uploadCsv } from '@apiClient/backendApiClient';
-import { getNotUploadedImages } from '@appHelper/imageHelper';
+import { getNotUploadedImages } from '@appHelpers/imageHelper';
 import { categories } from '@constants/categories';
 import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
@@ -66,9 +66,7 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className }) => {
   };
 
   return (
-    <div
-      className={clsx('bg-gray-800 flex flex-col gap-4 p-4 w-full', className)}
-    >
+    <div className={clsx('bg-gray-800 flex flex-col gap-4 p-4', className)}>
       <LabeledPicker
         labelClassName="w-28"
         label="Title"

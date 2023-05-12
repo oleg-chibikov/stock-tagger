@@ -26,7 +26,7 @@ const Layout: FunctionComponent = () => {
         <MainSection />
         <SidePanel
           className={
-            isSmallScreen ? undefined : 'flex-shrink-0 flex-grow-0 w-1/3'
+            isSmallScreen ? 'w-full' : 'flex-shrink-0 flex-grow-0 w-1/3'
           }
         />
       </div>

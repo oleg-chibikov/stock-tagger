@@ -1,31 +1,22 @@
+import { apiHandler } from '@backendHelpers/apiHelper';
+import { processRequestWithFiles } from '@backendHelpers/formidableHelper';
+import { outputDirectory, toWebUrl } from '@backendHelpers/uploadHelper';
 import { PROGRESS } from '@dataTransferTypes/event';
 import { UploadEvent, UploadOperation } from '@dataTransferTypes/upload';
 import { deleteFile, getFilesFromRequest } from '@services/helper';
 import { UpscalerService } from '@services/upscalerService';
 import EventEmitter from 'events';
-import formidable, { File } from 'formidable';
+import { File } from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Container from 'typedi';
-import { outputDirectory, toWebUrl } from '../../backend/helpers/uploadHelper';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  console.log('Uploading images...');
+const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
+  console.log('Upscaling images...');
   const upscalerService = Container.get(UpscalerService);
   const eventEmitter = Container.get(EventEmitter);
-  const form = new formidable.IncomingForm({
-    keepExtensions: true,
-    multiples: true,
-  });
 
-  form.parse(req, async (err, _fields, files) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('An error occurred');
-      return;
-    }
+  processRequestWithFiles(req, res, async (_fields, files) => {
+    throw new Error('sdfds');
 
     const upscaleImage = async (image: File): Promise<void> => {
       try {
@@ -76,10 +67,14 @@ export default async function handler(
       operation,
     } as UploadEvent);
   };
-}
+};
 
 export const config = {
   api: {
     bodyParser: false,
   },
 };
+
+export default apiHandler({
+  POST: upscale,
+});

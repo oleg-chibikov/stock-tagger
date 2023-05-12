@@ -4,7 +4,7 @@ import {
   getNotUploadedImages,
   getNotUpscaledImages,
   getUpscaledImages,
-} from '@appHelper/imageHelper';
+} from '@appHelpers/imageHelper';
 import { HelpIcon } from '@components/core/HelpIcon';
 import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
 import {
@@ -75,7 +75,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       onProgress: (event: UploadEvent) => void,
       imageData: ImageWithData[],
       upscaledImagesData?: ImageFileData[]
-    ) => Promise<boolean>,
+    ) => Promise<void>,
     filterImage: (image: ImageWithData) => boolean,
     eventAdditionalProcessing?: (data: UploadEvent) => void
   ) => {
@@ -88,32 +88,34 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       return;
     }
     setIsLoading(true);
+    try {
+      const initialProgress: Record<string, ProgressState> = {};
+      for (const image of imagesToProcess) {
+        initialProgress[image.name] = {
+          progress: 0,
+          operation: 'unknown',
+        };
+      }
 
-    const initialProgress: Record<string, ProgressState> = {};
-    for (const image of imagesToProcess) {
-      initialProgress[image.name] = {
-        progress: 0,
-        operation: 'unknown',
-      };
+      setUploadProgress(initialProgress);
+      const upscaledImages = getUpscaledImages(imagesToProcess).map(
+        (x) => ({ fileName: x.name, filePath: x.upscaledUri } as ImageFileData)
+      );
+      const notUpscaledImages = getNotUpscaledImages(imagesToProcess);
+      await operation(
+        (data) => {
+          eventAdditionalProcessing?.(data);
+          setUploadProgress((prevUploadProgress) => ({
+            ...prevUploadProgress,
+            [data.fileName]: data,
+          }));
+        },
+        notUpscaledImages,
+        upscaledImages
+      );
+    } finally {
+      setIsLoading(false);
     }
-
-    setUploadProgress(initialProgress);
-    const upscaledImages = getUpscaledImages(imagesToProcess).map(
-      (x) => ({ fileName: x.name, filePath: x.upscaledUri } as ImageFileData)
-    );
-    const notUpscaledImages = getNotUpscaledImages(imagesToProcess);
-    await operation(
-      (data) => {
-        eventAdditionalProcessing?.(data);
-        setUploadProgress((prevUploadProgress) => ({
-          ...prevUploadProgress,
-          [data.fileName]: data,
-        }));
-      },
-      notUpscaledImages,
-      upscaledImages
-    );
-    setIsLoading(false);
   };
 
   return (
@@ -124,16 +126,15 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       )}
     >
       {!isLoading && (
-        <div className="flex gap-2 w-full">
-          <ImagePicker className="w-full" onSelect={processUploadedImages} />
+        <ImagePicker className="w-full" onSelect={processUploadedImages}>
           <HelpIcon className="z-30" messages={messages} />
-        </div>
+        </ImagePicker>
       )}
 
       <>
         {Boolean(images.length) && (
           <>
-            <Gallery uploadProgress={uploadProgress} />
+            <Gallery uploadProgress={uploadProgress} isLoading={isLoading} />
             {isLoading && <ProgressLoader uploadProgress={uploadProgress} />}
             {!isLoading && (
               <>

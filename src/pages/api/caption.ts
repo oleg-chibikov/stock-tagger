@@ -1,32 +1,20 @@
+import { apiHandler } from '@backendHelpers/apiHelper';
+import { processRequestWithFiles } from '@backendHelpers/formidableHelper';
 import { CaptionEvent } from '@dataTransferTypes/caption';
 import { CAPTION_AVAILIABLE } from '@dataTransferTypes/event';
 import { CaptioningService } from '@services/captioningService';
 import { deleteFile, getFilesFromRequest } from '@services/helper';
 import EventEmitter from 'events';
-import formidable, { File } from 'formidable';
+import { File } from 'formidable';
 import { readFile } from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Container from 'typedi';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+const getCaptions = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log('Getting captions...');
   const captioningService = Container.get(CaptioningService);
   const eventEmitter = Container.get(EventEmitter);
-  const form = new formidable.IncomingForm({
-    keepExtensions: true,
-    multiples: true,
-  });
-
-  form.parse(req, async (err, _fields, files) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('An error occurred');
-      return;
-    }
-
+  processRequestWithFiles(req, res, async (_fields, files) => {
     const images = getFilesFromRequest(files);
 
     const annotationsPath = `annotations\\${process.env.CAPTIONING_DATASET}.json`;
@@ -98,10 +86,14 @@ export default async function handler(
       isFromFileMetadata: isFromFileMetadata,
     } as CaptionEvent);
   };
-}
+};
 
 export const config = {
   api: {
     bodyParser: false,
   },
 };
+
+export default apiHandler({
+  POST: getCaptions,
+});

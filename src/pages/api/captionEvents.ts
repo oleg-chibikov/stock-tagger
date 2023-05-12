@@ -1,7 +1,12 @@
+import { apiHandler } from '@backendHelpers/apiHelper';
+import { eventHandler } from '@backendHelpers/sseHelper';
 import { CAPTION_AVAILIABLE } from '@dataTransferTypes/event';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { eventHandler } from '../../backend/helpers/sseHelper';
 
-export default function handler(_req: NextApiRequest, res: NextApiResponse) {
+const streamCaptionEvents = (_req: NextApiRequest, res: NextApiResponse) => {
   eventHandler(CAPTION_AVAILIABLE, res);
-}
+};
+
+export default apiHandler({
+  POST: streamCaptionEvents,
+});

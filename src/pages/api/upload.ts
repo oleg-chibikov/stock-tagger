@@ -1,3 +1,6 @@
+import { apiHandler } from '@backendHelpers/apiHelper';
+import { processRequestWithFiles } from '@backendHelpers/formidableHelper';
+import { toServerUrl } from '@backendHelpers/uploadHelper';
 import { PROGRESS } from '@dataTransferTypes/event';
 import {
   ImageFileData,
@@ -7,30 +10,14 @@ import {
 import { getFilesFromRequest } from '@services/helper';
 import { SftpService } from '@services/sftpService';
 import EventEmitter from 'events';
-import formidable from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Container from 'typedi';
-import { toServerUrl } from '../../backend/helpers/uploadHelper';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  console.log('Uploading images...');
+const uploadToSftp = async (req: NextApiRequest, res: NextApiResponse) => {
+  console.log('Uploading images to SFTP...');
   const sftpService = Container.get(SftpService);
   const eventEmitter = Container.get(EventEmitter);
-  const form = new formidable.IncomingForm({
-    keepExtensions: true,
-    multiples: true,
-  });
-
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('An error occurred');
-      return;
-    }
-
+  processRequestWithFiles(req, res, async (fields, files) => {
     const uploadImagesToFtp = async (
       images: ImageFileData[]
     ): Promise<void> => {
@@ -101,9 +88,13 @@ export default async function handler(
       operation,
     } as UploadEvent);
   };
-}
+};
 export const config = {
   api: {
     bodyParser: false,
   },
 };
+
+export default apiHandler({
+  POST: uploadToSftp,
+});
