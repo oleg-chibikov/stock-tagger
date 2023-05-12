@@ -20,6 +20,8 @@ const imageSlice = createSlice({
   reducers: {
     setImages: (state, action: PayloadAction<ImageWithData[]>) => {
       state.images = action.payload;
+      state.newImagesTrigger = !state.newImagesTrigger;
+      state.selectedImages.clear();
     },
     toggleSelection: (state, action: PayloadAction<string>) => {
       if (state.selectedImages.has(action.payload)) {
@@ -41,9 +43,6 @@ const imageSlice = createSlice({
         image.uploadedToFtp = true;
       }
     },
-    triggerNewImages: (state) => {
-      state.newImagesTrigger = !state.newImagesTrigger;
-    },
   },
 });
 
@@ -52,6 +51,5 @@ export const {
   setUpscaledUri,
   setIsUploadedToFtp,
   toggleSelection,
-  triggerNewImages,
 } = imageSlice.actions;
 export default imageSlice.reducer;

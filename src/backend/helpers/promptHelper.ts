@@ -7,15 +7,22 @@ const removeEndingDot = (str: string): string => {
   return str.endsWith('.') ? str.slice(0, -1) : str;
 };
 
-const trimStart = (text: string, targetString: string): string => {
-  const targetIndex = text.indexOf(targetString);
-  return targetIndex !== -1
-    ? text.slice(targetIndex + targetString.length)
-    : text;
+const trimTextBefore = (text: string, searchString: string): string => {
+  const lowerText = text.toLowerCase();
+  const lowerSearchString = searchString.toLowerCase();
+
+  const index = lowerText.indexOf(lowerSearchString);
+  if (index !== -1) {
+    return text.substring(index + searchString.length);
+  }
+  return text;
 };
 
-const trimEnd = (text: string, targetString: string): string => {
-  const targetIndex = text.indexOf(targetString);
+const trimTextAfter = (text: string, searchString: string): string => {
+  const lowerText = text.toLowerCase();
+  const lowerSearchString = searchString.toLowerCase();
+
+  const targetIndex = lowerText.indexOf(lowerSearchString);
   return targetIndex !== -1 ? text.slice(0, targetIndex) : text;
 };
 
@@ -23,14 +30,14 @@ const removePrefixesAndPostfixes = (text: string): string => {
   let result = text;
 
   for (const prefix of promptPrefixes) {
-    result = trimStart(result, prefix);
+    result = trimTextBefore(result, prefix);
   }
 
   for (const postfix of promptPostfixes) {
-    result = trimEnd(result, postfix);
+    result = trimTextAfter(result, postfix);
   }
 
-  return result;
+  return result.trim();
 };
 
 const sanitize = (text: string) =>
