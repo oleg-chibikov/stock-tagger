@@ -4,7 +4,7 @@ import { CaptionEvent } from '@dataTransferTypes/caption';
 import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
 import clsx from 'clsx';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { getUniqueTags } from '../../helpers/tagHelper';
 import { Loader } from '../core/Loader';
@@ -23,7 +23,11 @@ export function RetrieveTagsButton({
   className,
 }: Props) {
   const selectedImages = useAppSelector((state) => state.image.selectedImages);
-  const images = useAppSelector((state) => state.image.images);
+  const imagesMap = useAppSelector((state) => state.image.images);
+  const images = useMemo(
+    () => Array.from(imagesMap).map((x) => x[1]),
+    [imagesMap]
+  );
   const [isLoading, setIsLoading] = useState(false);
   const tags = useAppSelector((state) => state.tag.tags);
   const dispatch = useDispatch();

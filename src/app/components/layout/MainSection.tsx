@@ -17,7 +17,7 @@ import {
 import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
 import clsx from 'clsx';
-import { FunctionComponent, useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Gallery } from '../core/Gallery';
 import { ImagePicker } from '../core/ImagePicker';
@@ -25,7 +25,8 @@ import { ProgressLoader, ProgressState } from '../core/ProgressLoader';
 
 const messages = [
   'Select the images which you would like to submit to stock.',
-  'Upscale them if needed using the Upscale button and upload to stock using the Upload to FTP button.',
+  'Upscale them if needed using the Upscale button',
+  'and upload to stock using the Upload to FTP button.',
   'Unless you select some of the images (click on the image), all of them will be processed.',
   'Click Retrieve tags and captions to get the metadata about the image',
   '(Imagga for tags, CLIP and PNG chunk info for captions)',
@@ -52,7 +53,11 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
     Record<string, ProgressState>
   >({});
   const selectedImages = useAppSelector((state) => state.image.selectedImages);
-  const images = useAppSelector((state) => state.image.images);
+  const imagesMap = useAppSelector((state) => state.image.images);
+  const images = useMemo(
+    () => Array.from(imagesMap).map((x) => x[1]),
+    [imagesMap]
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -67,7 +72,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
   const processUploadedImages = async (images: ImageWithData[] | null) => {
     if (images) {
       dispatch(setImages(images));
-      dispatch(setTags([]));
+      dispatch(setTags());
       setAllAreUpscaled(false);
     }
   };
@@ -208,7 +213,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
                     )
                   }
                 >
-                  {allAreUploaded ? 'Re-' : ''} Upload to stock
+                  {allAreUploaded ? 'Re-' : ''}Upload to stock
                 </button>
               </>
             )}

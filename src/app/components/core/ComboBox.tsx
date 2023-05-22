@@ -62,7 +62,7 @@ const ComboBox: FunctionComponent<ComboBoxProps> = ({
   const renderItem = ({ item }: { item: ComboBoxItem }) => (
     <div
       onClick={() => (showListWithOpacity ? handleSelect(item) : undefined)}
-      className="p-2 hover:bg-gray-800 cursor-pointer"
+      className="px-4 py-2 bg-gray-700 hover:bg-gray-800 cursor-pointer border-gray-900 border-y-2 border-solid"
     >
       {item.label}
     </div>
@@ -101,6 +101,25 @@ const ComboBox: FunctionComponent<ComboBoxProps> = ({
         placeholder={placeholder}
       />
 
+      <div className="absolute top-0 right-0 h-full flex items-center pointer-events-none">
+        <svg
+          className={clsx(
+            'w-4 h-4 mr-2 text-gray-600 transition-transform',
+            showListWithOpacity && 'rotate-180'
+          )}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
+
       {showList && (
         <div
           onTransitionEnd={() => {
@@ -109,7 +128,7 @@ const ComboBox: FunctionComponent<ComboBoxProps> = ({
             }
           }}
           className={clsx(
-            `max-h-96 w-full shadow-lg absolute top-full left-0 bg-gray-900 py-1 overflow-y-auto transition-opacity duration-500 ease-out`,
+            `max-h-96 w-full shadow-lg absolute top-full left-0 overflow-y-auto transition-opacity duration-500 ease-out`,
             showListWithOpacity ? 'opacity-100' : 'opacity-0',
             listClassName
           )}

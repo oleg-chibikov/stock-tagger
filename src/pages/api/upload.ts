@@ -76,6 +76,7 @@ const uploadToSftp = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     res.status(200).end();
+    eventEmitter.emit(PROGRESS, 'operation_finished');
   });
 
   const emitEvent = (

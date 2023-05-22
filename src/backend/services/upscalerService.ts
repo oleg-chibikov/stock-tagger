@@ -35,19 +35,21 @@ class UpscalerService {
       `Upscaling ${fileName} (${inputFilePath}) and saving it as ${outputDirectory}...`
     );
 
-    const modelPath = path.join(
-      'src',
-      'backend',
-      'upscale',
-      `${modelName}.pth`
+    const modelArgument =
+      modelName === 'ESRGAN_SRx4'
+        ? `--model_path "${path.join('weights', `${modelName}.pth`)}"`
+        : `-n ${modelName}`;
+
+    await runCommands(
+      [
+        getActivateCondaCommand(),
+        `python "${path.join(
+          process.env.ESRGAN_PATH as string,
+          'inference_realesrgan.py'
+        )}" --input "${inputFilePath}" --output "${outputDirectory}" ${modelArgument} --tile 256`,
+      ],
+      process.env.ESRGAN_PATH
     );
-    await runCommands([
-      getActivateCondaCommand(),
-      `python "${path.join(
-        process.env.ESRGAN_PATH as string,
-        'inference_realesrgan.py'
-      )}" --input "${inputFilePath}" --output "${outputDirectory}" --model_path "${modelPath}" --tile 256`,
-    ]);
     console.log(`Finished upscaling ${fileName}`);
     const parsed = path.parse(fileName);
     const newFilename = `${parsed.name}_out${parsed.ext}`;

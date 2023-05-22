@@ -70,7 +70,7 @@ const ZoomImage: FunctionComponent<ZoomProps> = ({
       {isHovered && (
         <figure
           className={clsx(
-            'border-solid border-8 border-white border-spacing-2 top-0 opacity-95 absolute w-96 h-96 z-10',
+            'border-solid border-8 border-white border-spacing-2 top-0 opacity-95 absolute w-96 h-96 z-20',
             className
           )}
           onClick={onClick}

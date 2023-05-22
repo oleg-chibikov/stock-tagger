@@ -3,6 +3,7 @@ import { CAPTION_AVAILIABLE, PROGRESS } from '@dataTransferTypes/event';
 import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import axios, { AxiosResponse } from 'axios';
+import { delay } from 'sharedHelper';
 import { ImageWithData, toFile } from '../helpers/imageHelper';
 
 const uploadCsv = async (fileContent: string) => {
@@ -74,6 +75,8 @@ const postImagesWithEvents = async <TData>(
       console.log(`Received ${eventName} event: ${event.data}`);
       onEvent(data);
     });
+
+    await delay(100); // wait a bit to make sure listener is attached
 
     const response = await postImages(
       mainEndpoint,

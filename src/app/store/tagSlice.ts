@@ -12,8 +12,8 @@ const tagSlice = createSlice({
   name: 'tag',
   initialState,
   reducers: {
-    setTags: (state, action: PayloadAction<string[]>) => {
-      state.tags = action.payload;
+    setTags: (state, action: PayloadAction<string[] | undefined>) => {
+      state.tags = action.payload ?? [];
     },
     removeTagAtIndex: (state, action: PayloadAction<number>) => {
       state.tags = state.tags.filter((_, i) => i !== action.payload);

@@ -4,7 +4,7 @@ import { categories } from '@constants/categories';
 import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
 import clsx from 'clsx';
-import { FunctionComponent, useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { FaCheck } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 import {
@@ -24,7 +24,11 @@ interface SidePanelProps {
 
 const SidePanel: FunctionComponent<SidePanelProps> = ({ className }) => {
   const tags = useAppSelector((state) => state.tag.tags);
-  const images = useAppSelector((state) => state.image.images);
+  const imagesMap = useAppSelector((state) => state.image.images);
+  const images = useMemo(
+    () => Array.from(imagesMap).map((x) => x[1]),
+    [imagesMap]
+  );
   const newImagesTrigger = useAppSelector(
     (state) => state.image.newImagesTrigger
   );
@@ -125,7 +129,7 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className }) => {
               <button
                 onClick={() => {
                   if (confirm('Clear all the tags?')) {
-                    dispatch(setTags([]));
+                    dispatch(setTags());
                   }
                 }}
                 className="bg-gray-500 hover:bg-red-600"

@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { delay } from 'sharedHelper';
 import Container from 'typedi';
 
 export function eventHandler(
@@ -20,14 +21,16 @@ export function eventHandler(
   //   emitter.removeListener(event, handler as (...args: any[]) => void);
   // });
 
-  const eventHandler = (data: any) => {
+  const eventHandler = async (data: any) => {
     const dataStr = JSON.stringify(data);
     console.log(`Received backend internal event ${event}: ${dataStr}`);
-    res.write(`event: ${event}\ndata: ${dataStr}\n\n`);
-    if (dataStr.indexOf('_done') !== -1 || dataStr.indexOf('_error') !== -1) {
-      res.end();
+    if (dataStr.indexOf('operation_finished') >= 0) {
       emitter.removeListener(event, eventHandler);
       console.log('Removed event listener');
+      await delay(1000);
+      res.end();
+    } else {
+      res.write(`event: ${event}\ndata: ${dataStr}\n\n`);
     }
   };
 

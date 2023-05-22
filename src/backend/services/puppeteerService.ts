@@ -2,20 +2,13 @@ import * as fs from 'fs';
 import * as os from 'os';
 import path from 'path';
 import puppeteer, { ElementHandle, Page } from 'puppeteer';
+import { delay } from 'sharedHelper';
 import { Service } from 'typedi';
 
 interface PuppeteerResult {
   caption: string;
   similarity: number;
 }
-
-const delay = async (milliseconds: number): Promise<void> => {
-  return new Promise<void>((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, milliseconds);
-  });
-};
 
 const chromeExecutablePath = process.env.CHROME_ANOTHER_INSTANCE_PATH;
 const chromeUserDataDir = process.env.CHROME_ANOTHER_INSTANCE_USER_DATA_PATH;

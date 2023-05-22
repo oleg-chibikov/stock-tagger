@@ -3,7 +3,7 @@ import { Styleable } from '@components/core/Styleable';
 import { toggleSelection } from '@store/imageSlice';
 import { useAppSelector } from '@store/store';
 import clsx from 'clsx';
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { LoaderOverlay } from './LoaderOverlay';
 import { ZoomImage } from './ZoomImage';
@@ -44,7 +44,11 @@ const Gallery: FunctionComponent<GalleryProps> = ({
   className,
   isLoading,
 }) => {
-  const images = useAppSelector((state) => state.image.images);
+  const imagesMap = useAppSelector((state) => state.image.images);
+  const images = useMemo(
+    () => Array.from(imagesMap).map((x) => x[1]),
+    [imagesMap]
+  );
   const selectedImages = useAppSelector((state) => state.image.selectedImages);
   const dispatch = useDispatch();
 

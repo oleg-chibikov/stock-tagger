@@ -22,6 +22,7 @@
       }
     ],
     "paths": {
+      "sharedHelper": ["./src/sharedHelper.ts"],
       "@services/*": ["./src/backend/services/*"],
       "@pages/*": ["./pages/*"],
       "@apiClient/*": ["./src/app/api/*"],

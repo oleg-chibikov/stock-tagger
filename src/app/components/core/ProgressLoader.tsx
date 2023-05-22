@@ -14,17 +14,19 @@ export interface ProgressState {
 const operationToString = (operation: UploadOperation) => {
   switch (operation) {
     case 'upscale':
-      return 'Upscale';
+      return 'Upscaling';
     case 'upscale_done':
       return 'Upscale Finished';
     case 'upscale_error':
       return 'Upscale Error';
     case 'ftp_upload':
-      return 'FTP Upload';
+      return 'Uploading to FTP';
     case 'ftp_upload_done':
       return 'FTP Upload Finished';
     case 'ftp_upload_error':
       return 'FTP Upload Error';
+    case 'operation_finished':
+      return 'Operation Finished';
     default:
       return 'Initialising';
   }

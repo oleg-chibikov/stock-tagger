@@ -74,6 +74,7 @@ const getCaptions = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     res.status(200).end();
+    eventEmitter.emit(CAPTION_AVAILIABLE, 'operation_finished');
   });
 
   const emitEvent = (

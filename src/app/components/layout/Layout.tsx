@@ -18,6 +18,7 @@ const Layout: FunctionComponent = () => {
     bg-gray-900
     h-screen
     overflow-x-hidden
+    select-none
   `;
 
   return (

@@ -3,13 +3,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ImageWithData } from '../helpers/imageHelper';
 
 interface ImageState {
-  images: ImageWithData[];
+  images: Map<string, ImageWithData>;
   selectedImages: Set<string>;
   newImagesTrigger: boolean;
 }
 
 const initialState: ImageState = {
-  images: [],
+  images: new Map<string, ImageWithData>(),
   selectedImages: new Set<string>(),
   newImagesTrigger: false,
 };
@@ -19,9 +19,12 @@ const imageSlice = createSlice({
   initialState,
   reducers: {
     setImages: (state, action: PayloadAction<ImageWithData[]>) => {
-      state.images = action.payload;
-      state.newImagesTrigger = !state.newImagesTrigger;
       state.selectedImages.clear();
+      state.images.clear();
+      for (const item of action.payload) {
+        state.images.set(item.name, item);
+      }
+      state.newImagesTrigger = !state.newImagesTrigger;
     },
     toggleSelection: (state, action: PayloadAction<string>) => {
       if (state.selectedImages.has(action.payload)) {
@@ -31,14 +34,14 @@ const imageSlice = createSlice({
       }
     },
     setUpscaledUri: (state, action: PayloadAction<UploadEvent>) => {
-      const image = state.images.find((x) => x.name == action.payload.fileName);
+      const image = state.images.get(action.payload.fileName);
       if (image) {
         image.upscaledUri = action.payload.filePath;
         image.uploadedToFtp = false;
       }
     },
     setIsUploadedToFtp: (state, action: PayloadAction<UploadEvent>) => {
-      const image = state.images.find((x) => x.name == action.payload.fileName); // TODO: can we store images in a set?
+      const image = state.images.get(action.payload.fileName);
       if (image) {
         image.uploadedToFtp = true;
       }

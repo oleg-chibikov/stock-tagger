@@ -61,12 +61,7 @@ const ImagePicker: FunctionComponent<ImagePickerProps> = ({
   };
 
   return (
-    <div
-      className={clsx(
-        'flex flex-col items-center space-y-2 select-none',
-        className
-      )}
-    >
+    <div className={clsx('flex flex-col items-center space-y-2', className)}>
       <div className="flex gap-2 w-full">
         <label
           htmlFor="image-input"
