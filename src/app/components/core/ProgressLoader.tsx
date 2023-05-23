@@ -3,8 +3,9 @@ import { Operation, OperationStatus } from '@dataTransferTypes/upload';
 import clsx from 'clsx';
 import { FunctionComponent } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import { Styleable } from './Styleable';
 
-interface ProgressLoadersProps {
+interface ProgressLoadersProps extends Styleable {
   operation: Operation;
   uploadProgress: Record<string, ProgressState>;
 }
@@ -36,13 +37,13 @@ const operationToString = (operation: OperationStatus) => {
 const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
   uploadProgress,
   operation,
+  className,
 }) => {
   const handleCancel = async () => {
     await cancelOperation(operation);
   };
   return (
-    <div className="w-full mt-8 pr-2 overflow-auto max-h-80">
-      <h1>{operation}</h1>
+    <div className={clsx(className, 'w-full mt-8 pr-2 overflow-auto max-h-80')}>
       {Object.keys(uploadProgress).map((imageName) => {
         const { progress, operationStatus } = uploadProgress[imageName];
         return (

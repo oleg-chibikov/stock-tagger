@@ -166,7 +166,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
   return (
     <div
       className={clsx(
-        'w-full p-4 bg-gray-800 gap-4 flex flex-col justify-center items-center z-40',
+        'w-full p-4 bg-gray-800 gap-4 flex flex-col justify-center items-center z-40 h-full',
         className
       )}
     >
@@ -179,7 +179,11 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
       <>
         {Boolean(images.length) && (
           <>
-            <Gallery uploadProgress={uploadProgress} isLoading={isLoading} />
+            <Gallery
+              className="basis-full"
+              uploadProgress={uploadProgress}
+              isLoading={isLoading}
+            />
             {isLoading && (
               <ProgressLoader
                 uploadProgress={uploadProgress}
