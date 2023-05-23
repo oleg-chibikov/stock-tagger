@@ -25,8 +25,6 @@ const operationToString = (operation: UploadOperation) => {
       return 'FTP Upload Finished';
     case 'ftp_upload_error':
       return 'FTP Upload Error';
-    case 'operation_finished':
-      return 'Operation Finished';
     default:
       return 'Initialising';
   }
@@ -36,7 +34,7 @@ const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
   uploadProgress,
 }) => {
   return (
-    <div className="w-full mt-8 pr-2 overflow-auto max-h-96">
+    <div className="w-full mt-8 pr-2 overflow-auto max-h-80">
       {Object.keys(uploadProgress).map((imageName) => {
         const { progress, operation } = uploadProgress[imageName];
         return (

@@ -12,18 +12,16 @@ const NewTag = ({ className }: Props) => {
   const dispatch = useDispatch();
   const [newTag, setNewTag] = useState('');
   const tags = useAppSelector((state) => state.tag.tags);
+  const reachedMaxTags = tags.length >= maxTags;
+  const isEmpty = !newTag.trim().length;
+
   const handleAddTag = () => {
-    if (newTag) {
-      const set = new Set(tags);
-      if (!set.has(newTag)) {
-        dispatch(prependTag(newTag));
-      }
+    if (newTag && !isEmpty && !reachedMaxTags) {
+      dispatch(prependTag(newTag));
       setNewTag('');
     }
   };
 
-  const reachedMaxTags = tags.length >= maxTags;
-  const isEmpty = !newTag.trim().length;
   return (
     <div className={clsx('flex', className)}>
       <input

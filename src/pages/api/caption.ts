@@ -7,16 +7,17 @@ import { deleteFile } from '@backendHelpers/fsHelper';
 import { CaptionEvent } from '@dataTransferTypes/caption';
 import { CAPTION_AVAILIABLE } from '@dataTransferTypes/event';
 import { CaptioningService } from '@services/captioningService';
-import EventEmitter from 'events';
 import { File } from 'formidable';
 import { readFile } from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Container from 'typedi';
+import { NextApiResponseWithSocket } from './socketio';
 
 const getCaptions = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log('Getting captions...');
+  const socketRes = res as NextApiResponseWithSocket;
+  const socket = socketRes.socket.server.io!;
   const captioningService = Container.get(CaptioningService);
-  const eventEmitter = Container.get(EventEmitter);
   processRequestWithFiles(req, res, async (_fields, files) => {
     const images = getFilesFromRequest(files);
 
@@ -74,7 +75,6 @@ const getCaptions = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     res.status(200).end();
-    eventEmitter.emit(CAPTION_AVAILIABLE, 'operation_finished');
   });
 
   const emitEvent = (
@@ -83,12 +83,13 @@ const getCaptions = async (req: NextApiRequest, res: NextApiResponse) => {
     similarity: number,
     isFromFileMetadata: boolean
   ) => {
-    eventEmitter.emit(CAPTION_AVAILIABLE, {
+    socket.emit(CAPTION_AVAILIABLE, {
       fileName: image.originalFilename,
       caption: caption,
       similarity: similarity,
       isFromFileMetadata: isFromFileMetadata,
     } as CaptionEvent);
+    console.log(`Emitted caption: ${caption}`);
   };
 };
 

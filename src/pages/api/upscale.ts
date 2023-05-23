@@ -9,15 +9,16 @@ import { PROGRESS } from '@dataTransferTypes/event';
 import { UploadEvent, UploadOperation } from '@dataTransferTypes/upload';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import { UpscalerService } from '@services/upscalerService';
-import EventEmitter from 'events';
 import { File } from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Container from 'typedi';
+import { NextApiResponseWithSocket } from './socketio';
 
 const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log('Upscaling images...');
+  const socketRes = res as NextApiResponseWithSocket;
+  const socket = socketRes.socket.server.io!;
   const upscalerService = Container.get(UpscalerService);
-  const eventEmitter = Container.get(EventEmitter);
 
   processRequestWithFiles(req, res, async (fields, files) => {
     const upscaleImage = async (image: File): Promise<void> => {
@@ -55,7 +56,6 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
     await upscaleImages();
 
     res.status(200).end();
-    eventEmitter.emit(PROGRESS, 'operation_finished');
   });
 
   const emitEvent = (
@@ -64,7 +64,7 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
     operation: UploadOperation,
     filePath?: string
   ) => {
-    eventEmitter.emit(PROGRESS, {
+    socket.emit(PROGRESS, {
       fileName,
       filePath,
       progress,

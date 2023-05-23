@@ -5,6 +5,7 @@ import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import axios, { AxiosResponse } from 'axios';
 import { delay } from 'sharedHelper';
 import { ImageWithData, toFile } from '../helpers/imageHelper';
+import { getSocket } from './socket';
 
 const uploadCsv = async (fileContent: string) => {
   const url = 'https://contributor.stock.adobe.com/en/uploads';
@@ -20,23 +21,22 @@ const uploadCsv = async (fileContent: string) => {
 const getCaptions = async (
   onProgress: (event: CaptionEvent) => void,
   imageData: ImageWithData[]
-): Promise<void> =>
-  await postImagesWithEvents<CaptionEvent>(
+): Promise<void> => {
+  return await postImagesWithSocket<CaptionEvent>(
     '/api/caption',
-    '/api/captionEvents',
     CAPTION_AVAILIABLE,
     onProgress,
     imageData
   );
+};
 
 const upscale = async (
   onProgress: (event: UploadEvent) => void,
   imageData: ImageWithData[],
   modelName: UpscaleModel
 ): Promise<void> =>
-  await postImagesWithEvents<UploadEvent>(
+  await postImagesWithSocket<UploadEvent>(
     '/api/upscale',
-    '/api/progressEvents',
     PROGRESS,
     onProgress,
     imageData,
@@ -49,34 +49,30 @@ const uploadToSftp = async (
   imageData: ImageWithData[],
   upscaledImagesData: ImageFileData[]
 ): Promise<void> =>
-  await postImagesWithEvents<UploadEvent>(
+  await postImagesWithSocket<UploadEvent>(
     '/api/upload',
-    '/api/progressEvents',
     PROGRESS,
     onProgress,
     imageData,
     upscaledImagesData
   );
 
-const postImagesWithEvents = async <TData>(
+const postImagesWithSocket = async <TData>(
   mainEndpoint: string,
-  eventEndpointName: string,
   eventName: string,
   onEvent: (data: TData) => void,
   imageData: ImageWithData[],
   upscaledImagesData?: ImageFileData[],
   data?: Record<string, string>
 ): Promise<void> => {
-  // Create a new EventSource to listen for SSE from the events route
-  const eventSource = new EventSource(eventEndpointName);
+  const socket = await getSocket();
+  const eventCallback = (data: TData) => {
+    console.log(`Received ${eventName} event: ${JSON.stringify(data)}`);
+    onEvent(data);
+  };
   try {
-    eventSource.addEventListener(eventName, (event) => {
-      const data = JSON.parse(event.data) as TData;
-      console.log(`Received ${eventName} event: ${event.data}`);
-      onEvent(data);
-    });
-
-    await delay(100); // wait a bit to make sure listener is attached
+    socket.on(eventName, eventCallback);
+    console.log('Subscribed to socket events');
 
     const response = await postImages(
       mainEndpoint,
@@ -89,7 +85,12 @@ const postImagesWithEvents = async <TData>(
       throw response.data;
     }
   } finally {
-    eventSource.close();
+    const unsubscribe = async () => {
+      await delay(3000); // give some time to receive the rest of the events
+      socket.off(eventName, eventCallback);
+      console.log('Unsubscribed from socket events');
+    };
+    unsubscribe(); // fire and forget, no await
   }
 };
 

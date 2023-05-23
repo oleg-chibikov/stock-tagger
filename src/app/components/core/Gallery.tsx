@@ -75,18 +75,17 @@ const Gallery: FunctionComponent<GalleryProps> = ({
             !isCurrentOperationFinished;
           const isUpscaled = image.upscaledUri !== undefined;
           const isSelected = selectedImages.has(image.name);
-          const areAllOperationsFinished =
-            progress?.operation === 'ftp_upload_done';
+          const isUploadedToFtp = image.uploadedToFtp;
 
           const children = (
             <ImageMarkers isSelected={isSelected} isUpscaled={isUpscaled} />
           );
 
           let className: string | undefined;
-          if (areAllOperationsFinished) {
-            className = 'border-green-500 border-8';
-          } else if (isError) {
+          if (isError) {
             className = 'border-red-500 border-8';
+          } else if (isUploadedToFtp) {
+            className = 'border-green-500 border-8';
           }
 
           const zoomImage = (

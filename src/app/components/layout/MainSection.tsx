@@ -7,15 +7,17 @@ import {
 } from '@appHelpers/imageHelper';
 import { ComboBox } from '@components/core/ComboBox';
 import { HelpIcon } from '@components/core/HelpIcon';
+import { Styleable } from '@components/core/Styleable';
 import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import {
-  setImages,
+  resetIsUploadedToFtp,
+  setAllAreUploaded,
+  setAllAreUpscaled,
   setIsUploadedToFtp,
   setUpscaledUri,
 } from '@store/imageSlice';
 import { useAppSelector } from '@store/store';
-import { setTags } from '@store/tagSlice';
 import clsx from 'clsx';
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -25,6 +27,7 @@ import { ProgressLoader, ProgressState } from '../core/ProgressLoader';
 
 const messages = [
   'Select the images which you would like to submit to stock.',
+  'You can also drop the images anywhere on the screen',
   'Upscale them if needed using the Upscale button',
   'and upload to stock using the Upload to FTP button.',
   'Unless you select some of the images (click on the image), all of them will be processed.',
@@ -39,19 +42,22 @@ const messages = [
   'Before processing images, log in to the stock website (one-time operation).',
 ];
 
-interface MainSectionProps {
-  className?: string;
+interface MainSectionProps extends Styleable {
+  processUploadedFiles: (files: FileList | null) => Promise<void>;
 }
 
-const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
+const MainSection: FunctionComponent<MainSectionProps> = ({
+  processUploadedFiles,
+  className,
+}) => {
   const [upscaleModel, setUpscaleModel] =
     useState<UpscaleModel>('RealESRGAN_x4plus');
   const [isLoading, setIsLoading] = useState(false);
-  const [allAreUpscaled, setAllAreUpscaled] = useState(false);
-  const [allAreUploaded, setAllAreUploaded] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<
     Record<string, ProgressState>
   >({});
+  const allAreUpscaled = useAppSelector((state) => state.image.allAreUpscaled);
+  const allAreUploaded = useAppSelector((state) => state.image.allAreUploaded);
   const selectedImages = useAppSelector((state) => state.image.selectedImages);
   const imagesMap = useAppSelector((state) => state.image.images);
   const images = useMemo(
@@ -62,20 +68,12 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
 
   useEffect(() => {
     if (images.length && !getNotUpscaledImages(images).length) {
-      setAllAreUpscaled(true);
+      dispatch(setAllAreUpscaled(true));
     }
     if (images.length && !getNotUploadedImages(images).length) {
-      setAllAreUploaded(true);
+      dispatch(setAllAreUploaded(true));
     }
-  }, [images]);
-
-  const processUploadedImages = async (images: ImageWithData[] | null) => {
-    if (images) {
-      dispatch(setImages(images));
-      dispatch(setTags());
-      setAllAreUpscaled(false);
-    }
-  };
+  }, [dispatch, images]);
 
   const processImages = async (
     operation: (
@@ -97,6 +95,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
     try {
       const initialProgress: Record<string, ProgressState> = {};
       for (const image of imagesToProcess) {
+        dispatch(resetIsUploadedToFtp(image.name));
         initialProgress[image.name] = {
           progress: 0,
           operation: 'unknown',
@@ -116,6 +115,45 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
     }
   };
 
+  const handleUpscale = () =>
+    processImages(
+      (onProgress, imageData) => {
+        const dataToProcess = allAreUpscaled
+          ? imageData
+          : getNotUpscaledImages(imageData);
+
+        return upscale(onProgress, dataToProcess, upscaleModel);
+      },
+      (image) => (allAreUpscaled ? true : !image.upscaledUri), // upscale only those not upscaled
+      (data) => {
+        if (data.operation === 'upscale_done') {
+          dispatch(setUpscaledUri(data));
+          setAllAreUploaded(false); // if something is upscaled it means it can be re-uploaded
+        }
+      }
+    );
+
+  const handleUploadToStock = () =>
+    processImages(
+      (onProgress, imageData) => {
+        const notUpscaledImages = getNotUpscaledImages(imageData);
+        const upscaledImages = getUpscaledImages(imageData).map(
+          (x) =>
+            ({
+              fileName: x.name,
+              filePath: x.upscaledUri,
+            } as ImageFileData)
+        );
+        return uploadToSftp(onProgress, notUpscaledImages, upscaledImages);
+      },
+      (image) => (allAreUploaded ? true : !image.uploadedToFtp), // upload only those not uploaded. However if all are uploaded - reupload everything
+      (data) => {
+        if (data.operation === 'ftp_upload_done') {
+          dispatch(setIsUploadedToFtp(data));
+        }
+      }
+    );
+
   return (
     <div
       className={clsx(
@@ -124,7 +162,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
       )}
     >
       {!isLoading && (
-        <ImagePicker className="w-full" onSelect={processUploadedImages}>
+        <ImagePicker className="w-full" onSelect={processUploadedFiles}>
           <HelpIcon className="z-30" messages={messages} />
         </ImagePicker>
       )}
@@ -139,28 +177,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
                 <div className="w-full flex flex-row gap-2">
                   <button
                     className={allAreUpscaled ? 'bg-gray-500' : undefined}
-                    onClick={() =>
-                      processImages(
-                        (onProgress, imageData) => {
-                          const dataToProcess = allAreUpscaled
-                            ? imageData
-                            : getNotUpscaledImages(imageData);
-
-                          return upscale(
-                            onProgress,
-                            dataToProcess,
-                            upscaleModel
-                          );
-                        },
-                        (image) => (allAreUpscaled ? true : !image.upscaledUri), // upscale only those not upscaled
-                        (data) => {
-                          if (data.operation === 'upscale_done') {
-                            dispatch(setUpscaledUri(data));
-                            setAllAreUploaded(false); // if something is upscaled it means it can be re-uploaded
-                          }
-                        }
-                      )
-                    }
+                    onClick={handleUpscale}
                   >
                     {allAreUpscaled ? 'Re-' : ''}Upscale
                   </button>
@@ -186,32 +203,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({ className }) => {
 
                 <button
                   className={allAreUploaded ? 'bg-gray-500' : undefined}
-                  onClick={() =>
-                    processImages(
-                      (onProgress, imageData) => {
-                        const notUpscaledImages =
-                          getNotUpscaledImages(imageData);
-                        const upscaledImages = getUpscaledImages(imageData).map(
-                          (x) =>
-                            ({
-                              fileName: x.name,
-                              filePath: x.upscaledUri,
-                            } as ImageFileData)
-                        );
-                        return uploadToSftp(
-                          onProgress,
-                          notUpscaledImages,
-                          upscaledImages
-                        );
-                      },
-                      (image) => (allAreUploaded ? true : !image.uploadedToFtp), // upload only those not uploaded. However if all are uploaded - reupload everything
-                      (data) => {
-                        if (data.operation === 'ftp_upload_done') {
-                          dispatch(setIsUploadedToFtp(data));
-                        }
-                      }
-                    )
-                  }
+                  onClick={handleUploadToStock}
                 >
                   {allAreUploaded ? 'Re-' : ''}Upload to stock
                 </button>

@@ -11,21 +11,22 @@ import {
   UploadOperation,
 } from '@dataTransferTypes/upload';
 import { SftpService } from '@services/sftpService';
-import EventEmitter from 'events';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Container from 'typedi';
+import { NextApiResponseWithSocket } from './socketio';
 
 const uploadToSftp = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log('Uploading images to SFTP...');
+  const socketRes = res as NextApiResponseWithSocket;
+  const socket = socketRes.socket.server.io!;
   const sftpService = Container.get(SftpService);
-  const eventEmitter = Container.get(EventEmitter);
   processRequestWithFiles(req, res, async (fields, files) => {
     const uploadImagesToFtp = async (
       images: ImageFileData[]
     ): Promise<void> => {
       console.log(`Uploading to ftp...`);
       // Create an array of promises for each image upload and execute in parallel
-      const promises = images.map(async (image) => {
+      const promises = images.map(async (image, i) => {
         try {
           emitEvent(image.fileName, 0.1, 'ftp_upload');
           await sftpService.uploadToSftp(
@@ -76,7 +77,6 @@ const uploadToSftp = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     res.status(200).end();
-    eventEmitter.emit(PROGRESS, 'operation_finished');
   });
 
   const emitEvent = (
@@ -85,7 +85,7 @@ const uploadToSftp = async (req: NextApiRequest, res: NextApiResponse) => {
     operation: UploadOperation,
     filePath?: string
   ) => {
-    eventEmitter.emit(PROGRESS, {
+    socket.emit(PROGRESS, {
       fileName,
       filePath,
       progress,

@@ -6,12 +6,16 @@ interface ImageState {
   images: Map<string, ImageWithData>;
   selectedImages: Set<string>;
   newImagesTrigger: boolean;
+  allAreUpscaled: boolean;
+  allAreUploaded: boolean;
 }
 
 const initialState: ImageState = {
   images: new Map<string, ImageWithData>(),
   selectedImages: new Set<string>(),
   newImagesTrigger: false,
+  allAreUpscaled: false,
+  allAreUploaded: false,
 };
 
 const imageSlice = createSlice({
@@ -46,6 +50,18 @@ const imageSlice = createSlice({
         image.uploadedToFtp = true;
       }
     },
+    resetIsUploadedToFtp: (state, action: PayloadAction<string>) => {
+      const image = state.images.get(action.payload);
+      if (image) {
+        image.uploadedToFtp = false;
+      }
+    },
+    setAllAreUpscaled: (state, action: PayloadAction<boolean>) => {
+      state.allAreUpscaled = action.payload;
+    },
+    setAllAreUploaded: (state, action: PayloadAction<boolean>) => {
+      state.allAreUploaded = action.payload;
+    },
   },
 });
 
@@ -53,6 +69,9 @@ export const {
   setImages,
   setUpscaledUri,
   setIsUploadedToFtp,
+  resetIsUploadedToFtp,
   toggleSelection,
+  setAllAreUpscaled,
+  setAllAreUploaded,
 } = imageSlice.actions;
 export default imageSlice.reducer;

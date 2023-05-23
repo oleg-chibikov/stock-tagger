@@ -1,5 +1,6 @@
 const generativeAiTags = ['Generative AI', 'Generative', 'AI'];
 const maxTags = 49;
+const maxTagsToRetrieve = maxTags - 5; // max number is 49, but having a smaller number gives some space to add tags manually
 
 interface Tag {
   confidence: number;
@@ -27,8 +28,8 @@ function getUniqueTags(
   }
   const updatedTags = [...uniqueTags].slice(
     0,
-    isAi ? maxTags - generativeAiTags.length : maxTags
-  ); // not more than maxTags tags
+    isAi ? maxTagsToRetrieve - generativeAiTags.length : maxTagsToRetrieve
+  ); // not more than maxTagsToRetrieve tags
 
   return isAi ? updatedTags.concat(generativeAiTags) : updatedTags;
 }

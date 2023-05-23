@@ -16,6 +16,7 @@
     "@types/react-dom": "18.2.4",
     "autoprefixer": "10.4.14",
     "axios": "^1.4.0",
+    "bufferutil": "^4.0.7",
     "clsx": "^1.2.1",
     "eslint": "8.40.0",
     "eslint-config-next": "13.4.1",
@@ -36,11 +37,15 @@
     "react-sortablejs": "^6.1.4",
     "react-spinners": "^0.13.8",
     "reflect-metadata": "^0.1.13",
+    "socket-io": "^1.0.0",
+    "socket.io": "^4.6.1",
+    "socket.io-client": "^4.6.1",
     "sortablejs": "^1.15.0",
     "ssh2-sftp-client": "^9.1.0",
     "tailwindcss": "3.3.2",
     "typedi": "^0.10.0",
     "typescript": "5.0.4",
+    "utf-8-validate": "^5.0.10",
     "yup": "^1.1.1"
   },
   "devDependencies": {
