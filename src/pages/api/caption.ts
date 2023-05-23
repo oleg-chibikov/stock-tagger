@@ -16,7 +16,7 @@ import { NextApiResponseWithSocket } from './socketio';
 const getCaptions = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log('Getting captions...');
   const socketRes = res as NextApiResponseWithSocket;
-  const socket = socketRes.socket.server.io!;
+  const io = socketRes.socket.server.io!;
   const captioningService = Container.get(CaptioningService);
   processRequestWithFiles(req, res, async (_fields, files) => {
     const images = getFilesFromRequest(files);
@@ -83,7 +83,7 @@ const getCaptions = async (req: NextApiRequest, res: NextApiResponse) => {
     similarity: number,
     isFromFileMetadata: boolean
   ) => {
-    socket.emit(CAPTION_AVAILIABLE, {
+    io.emit(CAPTION_AVAILIABLE, {
       fileName: image.originalFilename,
       caption: caption,
       similarity: similarity,

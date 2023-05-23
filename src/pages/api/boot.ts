@@ -3,6 +3,7 @@ import { getCondaPath, runCommands } from '@backendHelpers/commandHelper';
 import { createOrClearFolder } from '@backendHelpers/fsHelper';
 import { CaptioningService } from '@services/captioningService';
 import { UpscalerService } from '@services/upscalerService';
+import EventEmitter from 'events';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import 'reflect-metadata';
 import Client from 'ssh2-sftp-client';
@@ -21,6 +22,12 @@ const bootHandler = async () => {
       console.log(`Finished executing ${name}`);
     }
   };
+
+  await register('Register Event Emitter', async () => {
+    const emitter = new EventEmitter();
+    Container.set(EventEmitter, emitter);
+  });
+
   await register('Create Conda Environment', async () => {
     if (Boolean(process.env.SKIP_INSTALL)) {
       return;

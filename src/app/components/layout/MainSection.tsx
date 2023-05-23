@@ -8,7 +8,11 @@ import {
 import { ComboBox } from '@components/core/ComboBox';
 import { HelpIcon } from '@components/core/HelpIcon';
 import { Styleable } from '@components/core/Styleable';
-import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
+import {
+  ImageFileData,
+  Operation,
+  UploadEvent,
+} from '@dataTransferTypes/upload';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import {
   resetIsUploadedToFtp,
@@ -52,6 +56,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
 }) => {
   const [upscaleModel, setUpscaleModel] =
     useState<UpscaleModel>('RealESRGAN_x4plus');
+  const [operation, setOperation] = useState<Operation>('unknown');
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<
     Record<string, ProgressState>
@@ -76,7 +81,8 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
   }, [dispatch, images]);
 
   const processImages = async (
-    operation: (
+    operation: Operation,
+    action: (
       onProgress: (event: UploadEvent) => void,
       imageData: ImageWithData[]
     ) => Promise<void>,
@@ -91,6 +97,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
     if (!imagesToProcess.length) {
       return;
     }
+    setOperation(operation);
     setIsLoading(true);
     try {
       const initialProgress: Record<string, ProgressState> = {};
@@ -98,12 +105,12 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
         dispatch(resetIsUploadedToFtp(image.name));
         initialProgress[image.name] = {
           progress: 0,
-          operation: 'unknown',
+          operationStatus: 'unknown',
         };
       }
 
       setUploadProgress(initialProgress);
-      await operation((data) => {
+      await action((data) => {
         eventAdditionalProcessing?.(data);
         setUploadProgress((prevUploadProgress) => ({
           ...prevUploadProgress,
@@ -117,6 +124,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
 
   const handleUpscale = () =>
     processImages(
+      'upscale',
       (onProgress, imageData) => {
         const dataToProcess = allAreUpscaled
           ? imageData
@@ -126,7 +134,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
       },
       (image) => (allAreUpscaled ? true : !image.upscaledUri), // upscale only those not upscaled
       (data) => {
-        if (data.operation === 'upscale_done') {
+        if (data.operationStatus === 'upscale_done') {
           dispatch(setUpscaledUri(data));
           setAllAreUploaded(false); // if something is upscaled it means it can be re-uploaded
         }
@@ -135,6 +143,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
 
   const handleUploadToStock = () =>
     processImages(
+      'ftp_upload',
       (onProgress, imageData) => {
         const notUpscaledImages = getNotUpscaledImages(imageData);
         const upscaledImages = getUpscaledImages(imageData).map(
@@ -148,7 +157,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
       },
       (image) => (allAreUploaded ? true : !image.uploadedToFtp), // upload only those not uploaded. However if all are uploaded - reupload everything
       (data) => {
-        if (data.operation === 'ftp_upload_done') {
+        if (data.operationStatus === 'ftp_upload_done') {
           dispatch(setIsUploadedToFtp(data));
         }
       }
@@ -171,7 +180,12 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
         {Boolean(images.length) && (
           <>
             <Gallery uploadProgress={uploadProgress} isLoading={isLoading} />
-            {isLoading && <ProgressLoader uploadProgress={uploadProgress} />}
+            {isLoading && (
+              <ProgressLoader
+                uploadProgress={uploadProgress}
+                operation={operation}
+              />
+            )}
             {!isLoading && (
               <>
                 <div className="w-full flex flex-row gap-2">

@@ -7,8 +7,8 @@ import { toServerUrl } from '@backendHelpers/uploadHelper';
 import { PROGRESS } from '@dataTransferTypes/event';
 import {
   ImageFileData,
+  OperationStatus,
   UploadEvent,
-  UploadOperation,
 } from '@dataTransferTypes/upload';
 import { SftpService } from '@services/sftpService';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -18,7 +18,7 @@ import { NextApiResponseWithSocket } from './socketio';
 const uploadToSftp = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log('Uploading images to SFTP...');
   const socketRes = res as NextApiResponseWithSocket;
-  const socket = socketRes.socket.server.io!;
+  const io = socketRes.socket.server.io!;
   const sftpService = Container.get(SftpService);
   processRequestWithFiles(req, res, async (fields, files) => {
     const uploadImagesToFtp = async (
@@ -82,14 +82,14 @@ const uploadToSftp = async (req: NextApiRequest, res: NextApiResponse) => {
   const emitEvent = (
     fileName: string,
     progress: number,
-    operation: UploadOperation,
+    operationStatus: OperationStatus,
     filePath?: string
   ) => {
-    socket.emit(PROGRESS, {
+    io.emit(PROGRESS, {
       fileName,
       filePath,
       progress,
-      operation,
+      operationStatus,
     } as UploadEvent);
   };
 };

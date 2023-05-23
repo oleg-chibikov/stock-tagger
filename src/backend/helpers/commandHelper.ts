@@ -1,4 +1,7 @@
+import { CANCEL } from '@dataTransferTypes/event';
+import { Operation } from '@dataTransferTypes/upload';
 import { spawn } from 'child_process';
+import EventEmitter from 'events';
 import path from 'path';
 
 const getCondaPath = () =>
@@ -13,7 +16,9 @@ const getActivateCondaCommand = (): string =>
 
 const runCommands = async (
   commands: string[],
-  workingDir?: string
+  workingDir?: string,
+  eventEmitter?: EventEmitter,
+  operation?: Operation
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const commandString = commands.join(' && ');
@@ -22,12 +27,25 @@ const runCommands = async (
 
     let output = '';
     let error = '';
+    let cancelHandler = (cancelOperation: Operation) => {
+      if (operation === cancelOperation) {
+        console.log(`Killing spawned process for ${cancelOperation}...`);
+        const killResult = childProcess.kill();
+        console.log(
+          `Spawned process for ${cancelOperation} kill result: ${killResult}`
+        );
+        reject();
+      }
+    };
+
+    eventEmitter?.on(CANCEL, cancelHandler);
 
     // Log output from the child process
     childProcess.stdout.on('data', (data) => {
       console.log(data.toString());
       output += data.toString();
     });
+
     childProcess.stderr.on('data', (data) => {
       console.error(data.toString());
       error += data.toString();
@@ -39,6 +57,7 @@ const runCommands = async (
       } else {
         resolve(output);
       }
+      eventEmitter?.off(CANCEL, cancelHandler);
     });
   });
 };

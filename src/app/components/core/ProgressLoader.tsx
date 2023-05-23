@@ -1,17 +1,20 @@
-import { UploadOperation } from '@dataTransferTypes/upload';
+import { cancelOperation } from '@apiClient/backendApiClient';
+import { Operation, OperationStatus } from '@dataTransferTypes/upload';
 import clsx from 'clsx';
 import { FunctionComponent } from 'react';
+import { FaTimes } from 'react-icons/fa';
 
 interface ProgressLoadersProps {
+  operation: Operation;
   uploadProgress: Record<string, ProgressState>;
 }
 
 export interface ProgressState {
   progress: number;
-  operation: UploadOperation;
+  operationStatus: OperationStatus;
 }
 
-const operationToString = (operation: UploadOperation) => {
+const operationToString = (operation: OperationStatus) => {
   switch (operation) {
     case 'upscale':
       return 'Upscaling';
@@ -32,11 +35,16 @@ const operationToString = (operation: UploadOperation) => {
 
 const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
   uploadProgress,
+  operation,
 }) => {
+  const handleCancel = async () => {
+    await cancelOperation(operation);
+  };
   return (
     <div className="w-full mt-8 pr-2 overflow-auto max-h-80">
+      <h1>{operation}</h1>
       {Object.keys(uploadProgress).map((imageName) => {
-        const { progress, operation } = uploadProgress[imageName];
+        const { progress, operationStatus } = uploadProgress[imageName];
         return (
           <div key={imageName} className="my-2 w-full">
             <div className="flex flex-row items-center my-2">
@@ -51,12 +59,19 @@ const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
                 />
               </div>
               <div className="flex whitespace-nowrap justify-end">
-                {operationToString(operation)}
+                {operationToString(operationStatus)}
               </div>
             </div>
           </div>
         );
       })}
+      <button
+        title="Cancel"
+        className="bg-red-500 px-2 py-1 rounded-full hover:bg-red-200"
+        onClick={() => handleCancel()}
+      >
+        <FaTimes />
+      </button>
     </div>
   );
 };

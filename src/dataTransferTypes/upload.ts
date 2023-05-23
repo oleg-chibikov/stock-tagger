@@ -1,12 +1,13 @@
-type UploadOperation =
+type Operation = 'unknown' | 'upscale' | 'ftp_upload' | 'caption';
+
+type OperationStatus =
   | 'unknown'
   | 'upscale'
   | 'upscale_done'
   | 'upscale_error'
   | 'ftp_upload'
   | 'ftp_upload_done'
-  | 'ftp_upload_error'
-  | 'operation_finished';
+  | 'ftp_upload_error';
 
 interface ImageFileData {
   fileName: string;
@@ -15,7 +16,7 @@ interface ImageFileData {
 
 interface UploadEvent extends ImageFileData {
   progress: number;
-  operation: UploadOperation;
+  operationStatus: OperationStatus;
 }
 
-export type { UploadOperation, UploadEvent, ImageFileData };
+export type { Operation, OperationStatus, UploadEvent, ImageFileData };

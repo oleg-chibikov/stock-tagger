@@ -1,8 +1,16 @@
 import { apiHandler } from '@backendHelpers/apiHelper';
+import { CANCEL } from '@dataTransferTypes/event';
+import { Operation } from '@dataTransferTypes/upload';
+import { EventEmitter } from 'events';
 import { Server as HTTPServer } from 'http';
 import { Socket as NetSocket } from 'net';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Server as IOServer, ServerOptions } from 'socket.io';
+import {
+  Server as IOServer,
+  Socket as IOSocket,
+  ServerOptions,
+} from 'socket.io';
+import Container from 'typedi';
 
 export const config = {
   api: {
@@ -28,17 +36,23 @@ const handle = async (_req: NextApiRequest, res: NextApiResponse) => {
     console.log('New Socket.io server...');
     // adapt Next's net Server to http Server
     const httpServer = socketRes.socket.server;
+    const eventEmitter = Container.get(EventEmitter);
     const io = new IOServer(httpServer, {
       path: '/api/socketio',
       addTrailingSlash: false, // super important for latest version of Next.js
     } as ServerOptions); // Type assertion to ServerOptions
     // append SocketIO server to Next.js socket server response
     socketRes.socket.server.io = io;
-    io.on('connect', () => {
-      console.log('Socket connected');
+    io.on('connect', (socket: IOSocket) => {
+      console.log('Socket connected: ' + socket.id);
+
+      socket.on(CANCEL, (data: Operation) => {
+        console.log(`Got cancellation request for ${data} operation`);
+        eventEmitter.emit(CANCEL, data);
+      });
     });
-    io.on('disconnect', () => {
-      console.log('Socket disconnected');
+    io.on('disconnect', (socket: IOSocket) => {
+      console.log('Socket disconnected: ' + socket.id);
     });
   }
   res.end();

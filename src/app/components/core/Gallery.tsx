@@ -62,10 +62,10 @@ const Gallery: FunctionComponent<GalleryProps> = ({
         {images.map((image, index) => {
           const progress = uploadProgress[image.name];
           const isError = progress
-            ? errorStates.includes(progress.operation)
+            ? errorStates.includes(progress.operationStatus)
             : false;
           const isCurrentOperationFinished = progress
-            ? doneStates.includes(progress.operation)
+            ? doneStates.includes(progress.operationStatus)
             : false;
           const showLoading =
             isLoading &&

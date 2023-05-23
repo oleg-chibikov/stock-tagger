@@ -5,10 +5,15 @@ import {
 } from '@backendHelpers/formidableHelper';
 import { deleteFile } from '@backendHelpers/fsHelper';
 import { outputPath, toWebUrl } from '@backendHelpers/uploadHelper';
-import { PROGRESS } from '@dataTransferTypes/event';
-import { UploadEvent, UploadOperation } from '@dataTransferTypes/upload';
+import { CANCEL, PROGRESS } from '@dataTransferTypes/event';
+import {
+  Operation,
+  OperationStatus,
+  UploadEvent,
+} from '@dataTransferTypes/upload';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import { UpscalerService } from '@services/upscalerService';
+import EventEmitter from 'events';
 import { File } from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Container from 'typedi';
@@ -17,9 +22,9 @@ import { NextApiResponseWithSocket } from './socketio';
 const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log('Upscaling images...');
   const socketRes = res as NextApiResponseWithSocket;
-  const socket = socketRes.socket.server.io!;
+  const io = socketRes.socket.server.io!;
   const upscalerService = Container.get(UpscalerService);
-
+  const eventEmitter = Container.get(EventEmitter);
   processRequestWithFiles(req, res, async (fields, files) => {
     const upscaleImage = async (image: File): Promise<void> => {
       try {
@@ -43,17 +48,29 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     };
 
-    const upscaleImages = async (): Promise<void> => {
+    let cancel = false;
+    const cancelHandler = (operation: Operation) => {
+      if (operation === 'upscale') {
+        console.log('Got upscale cancellation request from event emitter');
+        cancel = true;
+      }
+    };
+    eventEmitter.on(CANCEL, cancelHandler);
+
+    try {
+      const images = getFilesFromRequest(files);
       console.log(`Processing ${images.length} images...`);
 
       // Sequentially executing as upscaling is a GPU heavy operation and hardly can be run in parallel
       for (const image of images) {
+        if (cancel) {
+          break;
+        }
         await upscaleImage(image);
       }
-    };
-
-    const images = getFilesFromRequest(files);
-    await upscaleImages();
+    } finally {
+      eventEmitter.off(CANCEL, cancelHandler);
+    }
 
     res.status(200).end();
   });
@@ -61,14 +78,14 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
   const emitEvent = (
     fileName: string,
     progress: number,
-    operation: UploadOperation,
+    operationStatus: OperationStatus,
     filePath?: string
   ) => {
-    socket.emit(PROGRESS, {
+    io.emit(PROGRESS, {
       fileName,
       filePath,
       progress,
-      operation,
+      operationStatus,
     } as UploadEvent);
   };
 };

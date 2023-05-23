@@ -4,10 +4,12 @@ import {
 } from '@backendHelpers/commandHelper';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import * as path from 'path';
+import { EventEmitter } from 'stream';
 import { Service } from 'typedi';
 
 @Service()
 class UpscalerService {
+  constructor(private eventEmitter: EventEmitter) {}
   async installDependencies(): Promise<void> {
     console.log('Installing upscaler service dependencies...');
     await runCommands(
@@ -48,7 +50,9 @@ class UpscalerService {
           'inference_realesrgan.py'
         )}" --input "${inputFilePath}" --output "${outputDirectory}" ${modelArgument} --tile 256`,
       ],
-      process.env.ESRGAN_PATH
+      process.env.ESRGAN_PATH,
+      this.eventEmitter,
+      'upscale'
     );
     console.log(`Finished upscaling ${fileName}`);
     const parsed = path.parse(fileName);

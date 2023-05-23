@@ -1,6 +1,10 @@
 import { CaptionEvent } from '@dataTransferTypes/caption';
-import { CAPTION_AVAILIABLE, PROGRESS } from '@dataTransferTypes/event';
-import { ImageFileData, UploadEvent } from '@dataTransferTypes/upload';
+import { CANCEL, CAPTION_AVAILIABLE, PROGRESS } from '@dataTransferTypes/event';
+import {
+  ImageFileData,
+  Operation,
+  UploadEvent,
+} from '@dataTransferTypes/upload';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import axios, { AxiosResponse } from 'axios';
 import { delay } from 'sharedHelper';
@@ -125,7 +129,13 @@ const postImages = async <TData>(
   });
 };
 
+const cancelOperation = async (operation: Operation) => {
+  const socket = await getSocket();
+  socket.emit(CANCEL, operation);
+  console.log(`Emitted cancellation request for ${operation}`);
+};
+
 const isSuccessResponse = (response: AxiosResponse<unknown, unknown>) =>
   response.status >= 200 && response.status < 300;
 
-export { uploadCsv, upscale, uploadToSftp, getCaptions };
+export { uploadCsv, upscale, uploadToSftp, getCaptions, cancelOperation };
