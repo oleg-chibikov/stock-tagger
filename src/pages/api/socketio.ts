@@ -1,6 +1,6 @@
 import { apiHandler } from '@backendHelpers/apiHelper';
 import { CANCEL } from '@dataTransferTypes/event';
-import { Operation } from '@dataTransferTypes/upload';
+import { Operation } from '@dataTransferTypes/operation';
 import { EventEmitter } from 'events';
 import { Server as HTTPServer } from 'http';
 import { Socket as NetSocket } from 'net';

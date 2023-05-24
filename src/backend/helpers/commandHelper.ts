@@ -1,5 +1,5 @@
 import { CANCEL } from '@dataTransferTypes/event';
-import { Operation } from '@dataTransferTypes/upload';
+import { Operation } from '@dataTransferTypes/operation';
 import { spawn } from 'child_process';
 import EventEmitter from 'events';
 import path from 'path';

@@ -8,11 +8,9 @@ import {
 import { ComboBox } from '@components/core/ComboBox';
 import { HelpIcon } from '@components/core/HelpIcon';
 import { Styleable } from '@components/core/Styleable';
-import {
-  ImageFileData,
-  Operation,
-  UploadEvent,
-} from '@dataTransferTypes/upload';
+import { ImageFileData } from '@dataTransferTypes/imageFileData';
+import { Operation } from '@dataTransferTypes/operation';
+import { UploadEvent } from '@dataTransferTypes/uploadEvent';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import {
   resetIsUploadedToFtp,

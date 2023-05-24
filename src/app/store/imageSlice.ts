@@ -1,4 +1,4 @@
-import { UploadEvent } from '@dataTransferTypes/upload';
+import { UploadEvent } from '@dataTransferTypes/uploadEvent';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ImageWithData } from '../helpers/imageHelper';
 

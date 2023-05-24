@@ -6,16 +6,15 @@ import {
 import { deleteFile } from '@backendHelpers/fsHelper';
 import { outputPath, toWebUrl } from '@backendHelpers/uploadHelper';
 import { CANCEL, PROGRESS } from '@dataTransferTypes/event';
-import {
-  Operation,
-  OperationStatus,
-  UploadEvent,
-} from '@dataTransferTypes/upload';
+import { Operation } from '@dataTransferTypes/operation';
+import { OperationStatus } from '@dataTransferTypes/operationStatus';
+import { UploadEvent } from '@dataTransferTypes/uploadEvent';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import { UpscalerService } from '@services/upscalerService';
 import EventEmitter from 'events';
 import { File } from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { CancellationToken } from 'sharedHelper';
 import Container from 'typedi';
 import { NextApiResponseWithSocket } from './socketio';
 
@@ -48,11 +47,11 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     };
 
-    let cancel = false;
+    const cancellationToken = new CancellationToken();
     const cancelHandler = (operation: Operation) => {
       if (operation === 'upscale') {
-        console.log('Got upscale cancellation request from event emitter');
-        cancel = true;
+        console.log(`Got ${operation} cancellation request from event emitter`);
+        cancellationToken.cancel();
       }
     };
     eventEmitter.on(CANCEL, cancelHandler);
@@ -63,7 +62,7 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
 
       // Sequentially executing as upscaling is a GPU heavy operation and hardly can be run in parallel
       for (const image of images) {
-        if (cancel) {
+        if (cancellationToken.isCancellationRequested) {
           break;
         }
         await upscaleImage(image);

@@ -1,10 +1,8 @@
 import { CaptionEvent } from '@dataTransferTypes/caption';
 import { CANCEL, CAPTION_AVAILIABLE, PROGRESS } from '@dataTransferTypes/event';
-import {
-  ImageFileData,
-  Operation,
-  UploadEvent,
-} from '@dataTransferTypes/upload';
+import { ImageFileData } from '@dataTransferTypes/imageFileData';
+import { Operation } from '@dataTransferTypes/operation';
+import { UploadEvent } from '@dataTransferTypes/uploadEvent';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import axios, { AxiosResponse } from 'axios';
 import { delay } from 'sharedHelper';
