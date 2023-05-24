@@ -57,8 +57,8 @@ const Gallery: FunctionComponent<GalleryProps> = ({
   };
 
   return (
-    <div className={clsx('relative', className)}>
-      <div className="w-full flex gap-2 flex-wrap justify-start max-h-96 overflow-y-auto">
+    <div className={clsx('overflow-y-auto relative', className)}>
+      <div className="w-full flex gap-2 flex-wrap justify-start">
         {images.map((image, index) => {
           const progress = uploadProgress[image.name];
           const isError = progress
@@ -90,8 +90,6 @@ const Gallery: FunctionComponent<GalleryProps> = ({
 
           const zoomImage = (
             <ZoomImage
-              isSelected={isSelected}
-              isUpscaled={isUpscaled}
               backgroundSrc={image.upscaledUri}
               src={image.uri}
               onClick={() => toggleImageSelection(image.name)}

@@ -2,6 +2,7 @@
 import { withSocket } from '@apiClient/withSocket';
 import { getImageData } from '@appHelpers/imageHelper';
 import { DraggableArea } from '@components/core/DraggableArea';
+import { ZoomImageDisplay } from '@components/core/ZoomImageDisplay';
 import {
   setAllAreUploaded,
   setAllAreUpscaled,
@@ -65,6 +66,7 @@ const InnerLayout: FunctionComponent = () => {
       onDropFiles={processUploadedFiles}
       className={containerStyles}
     >
+      <ZoomImageDisplay />
       <MainSection processUploadedFiles={processUploadedFiles} />
       <SidePanel
         className={isSmallScreen ? 'w-full' : 'flex-shrink-0 flex-grow-0 w-1/3'}

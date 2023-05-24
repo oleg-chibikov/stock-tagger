@@ -1,44 +1,44 @@
 import { Styleable } from '@components/core/Styleable';
+import { useAppSelector } from '@store/store';
+import {
+  setBackgroundImage,
+  setBackgroundPosition,
+  setIsHovered,
+  setZoomLevel,
+} from '@store/zoomImageSlice';
 import clsx from 'clsx';
 import Image from 'next/image';
-import { FunctionComponent, ReactNode, useEffect, useState } from 'react';
+import { FunctionComponent, ReactNode } from 'react';
+import { useDispatch } from 'react-redux';
 
-interface ZoomProps extends Styleable {
+interface ZoomImageProps extends Styleable {
   src: string;
   backgroundSrc?: string;
-  isUpscaled: boolean;
-  isSelected: boolean;
   onClick: () => void;
   children?: ReactNode;
 }
 
-const ZoomImage: FunctionComponent<ZoomProps> = ({
+const ZoomImage: FunctionComponent<ZoomImageProps> = ({
   src,
   backgroundSrc,
   className,
   onClick,
   children,
 }) => {
-  const [backgroundImage, setBackgroundImage] = useState(`url(${src})`);
-  const [isHovered, setIsHovered] = useState(false);
-  const [backgroundPosition, setBackgroundPosition] = useState('0% 0%');
-  const [zoomLevel, setZoomLevel] = useState(1);
-
-  useEffect(() => {
-    setBackgroundImage(`url(${backgroundSrc ?? src})`);
-  }, [src, backgroundSrc]);
+  const dispatch = useDispatch();
+  const { zoomLevel } = useAppSelector((state) => state.zoomImage);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } =
       e.currentTarget.getBoundingClientRect();
     const x = ((e.pageX - left) / width) * 100;
     const y = ((e.pageY - top) / height) * 100;
-    setBackgroundPosition(`${x}% ${y}%`);
+    dispatch(setBackgroundPosition(`${x}% ${y}%`));
   };
 
   const handleMouseWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     const newZoomLevel = Math.min(Math.max(zoomLevel - e.deltaY * 0.01, 1), 20);
-    setZoomLevel(newZoomLevel);
+    dispatch(setZoomLevel(newZoomLevel));
   };
 
   return (
@@ -48,6 +48,7 @@ const ZoomImage: FunctionComponent<ZoomProps> = ({
         className
       )}
       onWheel={handleMouseWheel}
+      onMouseMove={handleMouseMove}
     >
       <div className="relative">
         {children}
@@ -57,38 +58,17 @@ const ZoomImage: FunctionComponent<ZoomProps> = ({
           height={10}
           className="cursor-move w-48 h-48"
           onMouseEnter={() => {
-            setIsHovered(true);
+            dispatch(setIsHovered(true));
+            dispatch(setBackgroundImage(`url(${backgroundSrc ?? src})`));
           }}
           onMouseLeave={() => {
-            setIsHovered(false);
+            dispatch(setIsHovered(false));
           }}
           alt="image"
           src={src}
           style={{ objectFit: 'cover' }}
         />
       </div>
-      {isHovered && (
-        <figure
-          className={clsx(
-            'border-solid border-8 border-white border-spacing-2 top-0 opacity-95 absolute w-96 h-96 z-20',
-            className
-          )}
-          onClick={onClick}
-          onMouseLeave={() => {
-            setIsHovered(false);
-          }}
-          onMouseEnter={() => {
-            setIsHovered(true);
-          }}
-          onMouseMove={handleMouseMove}
-          style={{
-            backgroundRepeat: 'no-repeat',
-            backgroundImage,
-            backgroundPosition,
-            backgroundSize: `${zoomLevel * 100}%`,
-          }}
-        />
-      )}
     </div>
   );
 };

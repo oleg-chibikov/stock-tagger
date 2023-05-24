@@ -164,7 +164,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
   return (
     <div
       className={clsx(
-        'w-full p-4 bg-gray-800 gap-4 flex flex-col justify-center items-center z-40 h-full',
+        'w-full h-full p-4 bg-gray-800 gap-4 flex flex-col z-40',
         className
       )}
     >
@@ -178,7 +178,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
         {Boolean(images.length) && (
           <>
             <Gallery
-              className="basis-full"
+              className="flex-grow"
               uploadProgress={uploadProgress}
               isLoading={isLoading}
             />
