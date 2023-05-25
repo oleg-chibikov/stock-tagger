@@ -2,34 +2,16 @@ import { ProgressState } from '@components/core/ProgressLoader';
 import { Styleable } from '@components/core/Styleable';
 import { toggleSelection } from '@store/imageSlice';
 import { useAppSelector } from '@store/store';
+import {
+  setZoomImageSelected,
+  toggleZoomImageSelection,
+} from '@store/zoomImageSlice';
 import clsx from 'clsx';
 import { FunctionComponent, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { SelectedImageMarker, UpscaledImageMarker } from './ImageMarkers';
 import { LoaderOverlay } from './LoaderOverlay';
 import { ZoomImage } from './ZoomImage';
-
-interface ImageMarkersProps {
-  isSelected: boolean;
-  isUpscaled: boolean;
-}
-
-const ImageMarkers: FunctionComponent<ImageMarkersProps> = ({
-  isSelected,
-  isUpscaled,
-}) => (
-  <>
-    {isSelected && (
-      <div className="absolute top-3 right-3 w-6 h-6 flex justify-center items-center bg-white rounded-full border-black border-2">
-        <span className="text-black font-bold">✓</span>
-      </div>
-    )}
-    {isUpscaled && (
-      <div className="absolute top-3 left-3 w-6 h-6 flex justify-center items-center bg-white rounded-full border-black border-2">
-        <span className="text-black font-bold">U</span>
-      </div>
-    )}
-  </>
-);
 
 const errorStates = ['ftp_upload_error', 'upscale_error'];
 const doneStates = ['ftp_upload_done', 'upscale_done'];
@@ -54,6 +36,7 @@ const Gallery: FunctionComponent<GalleryProps> = ({
 
   const toggleImageSelection = (imageName: string) => {
     dispatch(toggleSelection(imageName));
+    dispatch(toggleZoomImageSelection());
   };
 
   return (
@@ -78,7 +61,10 @@ const Gallery: FunctionComponent<GalleryProps> = ({
           const isUploadedToFtp = image.uploadedToFtp;
 
           const children = (
-            <ImageMarkers isSelected={isSelected} isUpscaled={isUpscaled} />
+            <>
+              <SelectedImageMarker isActive={isSelected} />
+              <UpscaledImageMarker isActive={isUpscaled} />
+            </>
           );
 
           let className: string | undefined;
@@ -90,9 +76,13 @@ const Gallery: FunctionComponent<GalleryProps> = ({
 
           const zoomImage = (
             <ZoomImage
+              name={image.name}
               backgroundSrc={image.upscaledUri}
               src={image.uri}
               onClick={() => toggleImageSelection(image.name)}
+              onMouseEnter={() => {
+                dispatch(setZoomImageSelected(isSelected));
+              }}
               className={className}
             >
               {children}

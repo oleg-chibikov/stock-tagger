@@ -1,10 +1,10 @@
 import { Styleable } from '@components/core/Styleable';
-import { useAppSelector } from '@store/store';
 import {
   setBackgroundImage,
   setBackgroundPosition,
   setIsHovered,
-  setZoomLevel,
+  setZoomImageSelected,
+  updateZoomLevel,
 } from '@store/zoomImageSlice';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -12,21 +12,24 @@ import { FunctionComponent, ReactNode } from 'react';
 import { useDispatch } from 'react-redux';
 
 interface ZoomImageProps extends Styleable {
+  name: string;
   src: string;
   backgroundSrc?: string;
   onClick: () => void;
+  onMouseEnter: () => void;
   children?: ReactNode;
 }
 
 const ZoomImage: FunctionComponent<ZoomImageProps> = ({
+  name,
   src,
   backgroundSrc,
   className,
   onClick,
+  onMouseEnter,
   children,
 }) => {
   const dispatch = useDispatch();
-  const { zoomLevel } = useAppSelector((state) => state.zoomImage);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } =
@@ -37,8 +40,7 @@ const ZoomImage: FunctionComponent<ZoomImageProps> = ({
   };
 
   const handleMouseWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    const newZoomLevel = Math.min(Math.max(zoomLevel - e.deltaY * 0.01, 1), 20);
-    dispatch(setZoomLevel(newZoomLevel));
+    dispatch(updateZoomLevel(e.deltaY));
   };
 
   return (
@@ -59,10 +61,17 @@ const ZoomImage: FunctionComponent<ZoomImageProps> = ({
           className="cursor-move w-48 h-48"
           onMouseEnter={() => {
             dispatch(setIsHovered(true));
-            dispatch(setBackgroundImage(`url(${backgroundSrc ?? src})`));
+            dispatch(
+              setBackgroundImage({
+                src: `url(${backgroundSrc ?? src})`,
+                name: name,
+              })
+            );
+            onMouseEnter();
           }}
           onMouseLeave={() => {
             dispatch(setIsHovered(false));
+            dispatch(setZoomImageSelected(false));
           }}
           alt="image"
           src={src}

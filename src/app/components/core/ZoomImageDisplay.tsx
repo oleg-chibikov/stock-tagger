@@ -1,16 +1,24 @@
+import { toggleSelection } from '@store/imageSlice';
 import { useAppSelector } from '@store/store';
 import {
   setBackgroundPosition,
   setIsHovered,
-  setZoomLevel,
+  toggleZoomImageSelection,
+  updateZoomLevel,
 } from '@store/zoomImageSlice';
 import { FunctionComponent } from 'react';
 import { useDispatch } from 'react-redux';
+import { SelectedImageMarker } from './ImageMarkers';
 
 const ZoomImageDisplay: FunctionComponent = () => {
   const dispatch = useDispatch();
-  const { backgroundImage, isHovered, backgroundPosition, zoomLevel } =
-    useAppSelector((state) => state.zoomImage);
+  const {
+    backgroundImage,
+    isHovered,
+    backgroundPosition,
+    zoomLevel,
+    isSelected,
+  } = useAppSelector((state) => state.zoomImage);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } =
@@ -21,8 +29,7 @@ const ZoomImageDisplay: FunctionComponent = () => {
   };
 
   const handleMouseWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    const newZoomLevel = Math.min(Math.max(zoomLevel - e.deltaY * 0.01, 1), 20);
-    dispatch(setZoomLevel(newZoomLevel));
+    dispatch(updateZoomLevel(e.deltaY));
   };
 
   if (!isHovered) {
@@ -32,7 +39,7 @@ const ZoomImageDisplay: FunctionComponent = () => {
   return (
     <figure
       onWheel={handleMouseWheel}
-      className="bg-slate-900 border-solid border-8 border-white border-spacing-2 opacity-95 fixed m-auto top-0 bottom-0 left-0 right-0 w-1/2 h-3/4 z-50"
+      className="bg-slate-900 border-solid border-8 border-white border-spacing-2 opacity-95 fixed top-10 left-10 w-1/2 h-3/4 z-50"
       onMouseLeave={() => {
         dispatch(setIsHovered(false));
       }}
@@ -40,13 +47,19 @@ const ZoomImageDisplay: FunctionComponent = () => {
         dispatch(setIsHovered(true));
       }}
       onMouseMove={handleMouseMove}
+      onClick={() => {
+        dispatch(toggleZoomImageSelection());
+        backgroundImage && dispatch(toggleSelection(backgroundImage.name));
+      }}
       style={{
         backgroundRepeat: 'no-repeat',
-        backgroundImage,
+        backgroundImage: backgroundImage?.src,
         backgroundPosition,
         backgroundSize: `${zoomLevel * 100}%`,
       }}
-    />
+    >
+      <SelectedImageMarker isActive={isSelected} />
+    </figure>
   );
 };
 
