@@ -1,3 +1,4 @@
+import { ImageFileData } from '@dataTransferTypes/imageFileData';
 import { Fields, File, Files, IncomingForm } from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -33,4 +34,11 @@ const getFilesFromRequest = (files: Files): File[] => {
   return Object.values(files).flatMap((x) => x);
 };
 
-export { processRequestWithFiles, getFilesFromRequest };
+const convertToImageFileData = (file: File): ImageFileData => {
+  return {
+    filePath: file.filepath,
+    fileName: file.originalFilename as string,
+  };
+};
+
+export { convertToImageFileData, processRequestWithFiles, getFilesFromRequest };

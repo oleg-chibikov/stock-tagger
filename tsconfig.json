@@ -21,17 +21,18 @@
         "name": "next"
       }
     ],
+    "baseUrl": "./",
     "paths": {
-      "sharedHelper": ["./src/sharedHelper.ts"],
-      "@services/*": ["./src/backend/services/*"],
-      "@pages/*": ["./pages/*"],
-      "@apiClient/*": ["./src/app/api/*"],
-      "@components/*": ["./src/app/components/*"],
-      "@store/*": ["./src/app/store/*"],
-      "@dataTransferTypes/*": ["./src/dataTransferTypes/*"],
-      "@appHelpers/*": ["./src/app/helpers/*"],
-      "@constants/*": ["./src/app/constants/*"],
-      "@backendHelpers/*": ["./src/backend/helpers/*"]
+      "sharedHelper": ["src/helpers/promiseHelper.ts"],
+      "@services/*": ["src/backend/services/*"],
+      "@pages/*": ["pages/*"],
+      "@apiClient/*": ["src/app/api/*"],
+      "@components/*": ["src/app/components/*"],
+      "@store/*": ["src/app/store/*"],
+      "@dataTransferTypes/*": ["src/dataTransferTypes/*"],
+      "@appHelpers/*": ["src/helpers/*"],
+      "@constants/*": ["src/app/constants/*"],
+      "@backendHelpers/*": ["src/backend/helpers/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

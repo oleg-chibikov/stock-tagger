@@ -1,14 +1,15 @@
-import { getCaptions } from '@apiClient/backendApiClient';
+import { cancelOperation, getCaptions } from '@apiClient/backendApiClient';
 import { uploadImageAndGetTags } from '@apiClient/imaggaApiClient';
+import { getUniqueTags } from '@appHelpers/tagHelper';
+import { Loader } from '@components/core/Loader';
+import { Styleable } from '@components/core/Styleable';
 import { CaptionEvent } from '@dataTransferTypes/caption';
 import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
 import clsx from 'clsx';
 import { useMemo, useState } from 'react';
+import { FaTimes } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
-import { getUniqueTags } from '../../helpers/tagHelper';
-import { Loader } from '../core/Loader';
-import { Styleable } from '../core/Styleable';
 
 interface Props extends Styleable {
   onCaptionRetrieved: (caption: CaptionEvent) => void;
@@ -57,23 +58,27 @@ export function RetrieveTagsButton({
 
   const handlePress = async () => {
     setIsLoading(true);
-    await Promise.all([retrieveTags(), retrieveCaptions()]);
+    await Promise.allSettled([retrieveTags(), retrieveCaptions()]);
+
     setIsLoading(false);
   };
 
   return (
-    <div className={clsx('flex items-center', className)}>
-      <button
-        className="disabled:bg-slate-500 bg-teal-500 hover:bg-teal-700 py-2 px-2 w-full"
-        onClick={handlePress}
-        disabled={isLoading}
-      >
+    <div className={clsx('flex gap-2 flex-row  items-center', className)}>
+      <button onClick={handlePress} disabled={isLoading}>
         Retrieve tags and captions
       </button>
       {isLoading && (
-        <div className="ml-2 flex items-center">
+        <>
           <Loader />
-        </div>
+          <button
+            className="icon cancel"
+            title="Cancel"
+            onClick={() => cancelOperation('caption')}
+          >
+            <FaTimes />
+          </button>
+        </>
       )}
     </div>
   );

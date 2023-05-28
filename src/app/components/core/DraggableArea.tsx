@@ -52,11 +52,16 @@ const DraggableArea: FunctionComponent<DraggableAreaProps> = ({
       className={clsx(
         className,
         'transition-colors duration-200 ease-in-out',
-        dragStatus
-          ? 'bg-teal-300 bg-opacity-30 border-4 border-dashed border-teal-500'
-          : 'bg-opacity-10 bg-teal-300'
+        dragStatus ? 'border-4 border-dashed border-teal-500' : ''
       )}
     >
+      {dragStatus && (
+        <div className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-50">
+          <div className="flex items-center justify-center h-full">
+            <span className="text-white text-2xl">Drop images here</span>
+          </div>
+        </div>
+      )}
       {children}
     </div>
   );

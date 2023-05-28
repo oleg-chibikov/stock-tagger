@@ -1,3 +1,4 @@
+import { delay } from '@appHelpers/promiseHelper';
 import { CaptionEvent } from '@dataTransferTypes/caption';
 import { CANCEL, CAPTION_AVAILIABLE, PROGRESS } from '@dataTransferTypes/event';
 import { ImageFileData } from '@dataTransferTypes/imageFileData';
@@ -5,8 +6,7 @@ import { Operation } from '@dataTransferTypes/operation';
 import { UploadEvent } from '@dataTransferTypes/uploadEvent';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import axios, { AxiosResponse } from 'axios';
-import { delay } from 'sharedHelper';
-import { ImageWithData, toFile } from '../helpers/imageHelper';
+import { ImageWithData, toFile } from '../../helpers/imageHelper';
 import { getSocket } from './socket';
 
 const uploadCsv = async (fileContent: string) => {
@@ -35,7 +35,8 @@ const getCaptions = async (
 const upscale = async (
   onProgress: (event: UploadEvent) => void,
   imageData: ImageWithData[],
-  modelName: UpscaleModel
+  modelName: UpscaleModel,
+  uploadImmediately: boolean
 ): Promise<void> =>
   await postImagesWithSocket<UploadEvent>(
     '/api/upscale',
@@ -43,7 +44,7 @@ const upscale = async (
     onProgress,
     imageData,
     undefined,
-    { modelName: modelName }
+    { modelName: modelName, uploadImmediately: uploadImmediately.toString() }
   );
 
 const uploadToSftp = async (

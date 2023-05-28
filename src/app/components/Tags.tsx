@@ -35,7 +35,7 @@ const Tags: FunctionComponent<TagsProps> = ({ className }) => {
             list={mappedTags}
             setList={mappedSetTags}
             tag="div"
-            className="overflow-y-auto flex flex-1 flex-col gap-2 max-h-80"
+            className="overflow-y-auto flex flex-1 flex-col gap-2 max-h-64"
           >
             {tags.map((tag, index) => (
               <Tag

@@ -20,7 +20,7 @@ const runCommands = async (
   eventEmitter?: EventEmitter,
   operation?: Operation
 ): Promise<string> => {
-  return new Promise((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     const commandString = commands.join(' && ');
     console.log(`Executing ${commandString}...`);
     const childProcess = spawn(commandString, { shell: true, cwd: workingDir });
@@ -34,7 +34,7 @@ const runCommands = async (
         console.log(
           `Spawned process for ${cancelOperation} kill result: ${killResult}`
         );
-        reject();
+        resolve('Cancelled');
       }
     };
 

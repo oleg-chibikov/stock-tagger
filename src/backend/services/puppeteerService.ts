@@ -1,8 +1,8 @@
+import { delay } from '@appHelpers/promiseHelper';
 import * as fs from 'fs';
 import * as os from 'os';
 import path from 'path';
 import puppeteer, { ElementHandle, Page } from 'puppeteer';
-import { delay } from 'sharedHelper';
 import { Service } from 'typedi';
 
 interface PuppeteerResult {
@@ -81,7 +81,8 @@ class PuppeteerService {
         await clickByXPath(page, '//label[contains(span/span/text(), "No")]');
 
         console.log('Click the Generative AI checkbox');
-        const generativeAiCheckboxSelector = '#generativeAIContent';
+        const generativeAiCheckboxSelector =
+          '#content-tagger-generative-ai-checkbox';
         await page.waitForSelector(generativeAiCheckboxSelector);
         await page.click(generativeAiCheckboxSelector);
 

@@ -3,6 +3,7 @@ import {
   runCommands,
 } from '@backendHelpers/commandHelper';
 import { sanitize } from '@backendHelpers/promptHelper';
+import EventEmitter from 'events';
 import path from 'path';
 import text from 'png-chunk-text';
 import extractChunks from 'png-chunks-extract';
@@ -15,6 +16,7 @@ interface CaptioningResult {
 
 @Service()
 class CaptioningService {
+  constructor(private eventEmitter: EventEmitter) {}
   async installDependencies(): Promise<void> {
     console.log('Installing captioning service dependencies...');
     await runCommands(
@@ -40,7 +42,9 @@ class CaptioningService {
           annotationsPath
         )}" --batch_size ${batchSize} --num_samples ${numberOfAnnotations} --num_results ${numberOfResults}`,
       ],
-      process.cwd()
+      process.cwd(),
+      this.eventEmitter,
+      'caption'
     );
     const lines = output.split('\n');
     const startIndex = lines.findIndex((line) =>

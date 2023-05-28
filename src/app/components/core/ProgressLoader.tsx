@@ -46,7 +46,7 @@ const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
   return (
     <>
       <div
-        className={clsx(className, 'w-full mt-8 pr-2 overflow-auto max-h-80')}
+        className={clsx(className, 'w-full mt-8 overflow-auto max-h-80 px-4')}
       >
         {Object.keys(uploadProgress).map((imageName) => {
           const { progress, operationStatus } = uploadProgress[imageName];
@@ -71,11 +71,7 @@ const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
           );
         })}
       </div>
-      <button
-        title="Cancel"
-        className="bg-red-500 px-2 py-1 rounded-full hover:bg-red-200"
-        onClick={() => handleCancel()}
-      >
+      <button title="Cancel" className="cancel" onClick={() => handleCancel()}>
         <FaTimes />
       </button>
     </>

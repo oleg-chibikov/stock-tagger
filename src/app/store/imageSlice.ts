@@ -1,6 +1,6 @@
 import { UploadEvent } from '@dataTransferTypes/uploadEvent';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ImageWithData } from '../helpers/imageHelper';
+import { ImageWithData } from '../../helpers/imageHelper';
 
 interface ImageState {
   images: Map<string, ImageWithData>;

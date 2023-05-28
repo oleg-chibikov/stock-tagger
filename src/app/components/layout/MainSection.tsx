@@ -1,11 +1,6 @@
 import { uploadToSftp, upscale } from '@apiClient/backendApiClient';
-import {
-  ImageWithData,
-  getNotUploadedImages,
-  getNotUpscaledImages,
-  getUpscaledImages,
-} from '@appHelpers/imageHelper';
-import { ComboBox } from '@components/core/ComboBox';
+import { UploadToStockButton } from '@components/UploadButton';
+import { UpscaleButton } from '@components/UpscaleButton';
 import { HelpIcon } from '@components/core/HelpIcon';
 import { Styleable } from '@components/core/Styleable';
 import { ImageFileData } from '@dataTransferTypes/imageFileData';
@@ -23,6 +18,12 @@ import { useAppSelector } from '@store/store';
 import clsx from 'clsx';
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import {
+  ImageWithData,
+  getNotUploadedImages,
+  getNotUpscaledImages,
+  getUpscaledImages,
+} from '../../../helpers/imageHelper';
 import { Gallery } from '../core/Gallery';
 import { ImagePicker } from '../core/ImagePicker';
 import { ProgressLoader, ProgressState } from '../core/ProgressLoader';
@@ -54,6 +55,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
 }) => {
   const [upscaleModel, setUpscaleModel] =
     useState<UpscaleModel>('RealESRGAN_x4plus');
+  const [uploadImmediately, setUploadImmediately] = useState(true);
   const [operation, setOperation] = useState<Operation>('unknown');
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<
@@ -120,6 +122,20 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
     }
   };
 
+  const onEvent = (data: UploadEvent) => {
+    switch (data.operationStatus) {
+      case 'upscale_done':
+        dispatch(setUpscaledUri(data));
+        setAllAreUploaded(false); // if something is upscaled it means it can be re-uploaded
+        break;
+      case 'ftp_upload_done':
+        dispatch(setIsUploadedToFtp(data));
+        break;
+      default:
+        break;
+    }
+  };
+
   const handleUpscale = () =>
     processImages(
       'upscale',
@@ -128,15 +144,15 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
           ? imageData
           : getNotUpscaledImages(imageData);
 
-        return upscale(onProgress, dataToProcess, upscaleModel);
+        return upscale(
+          onProgress,
+          dataToProcess,
+          upscaleModel,
+          uploadImmediately
+        );
       },
       (image) => (allAreUpscaled ? true : !image.upscaledUri), // upscale only those not upscaled
-      (data) => {
-        if (data.operationStatus === 'upscale_done') {
-          dispatch(setUpscaledUri(data));
-          setAllAreUploaded(false); // if something is upscaled it means it can be re-uploaded
-        }
-      }
+      onEvent
     );
 
   const handleUploadToStock = () =>
@@ -154,11 +170,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
         return uploadToSftp(onProgress, notUpscaledImages, upscaledImages);
       },
       (image) => (allAreUploaded ? true : !image.uploadedToFtp), // upload only those not uploaded. However if all are uploaded - reupload everything
-      (data) => {
-        if (data.operationStatus === 'ftp_upload_done') {
-          dispatch(setIsUploadedToFtp(data));
-        }
-      }
+      onEvent
     );
 
   return (
@@ -190,39 +202,19 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
             )}
             {!isLoading && (
               <>
-                <div className="w-full flex flex-row gap-2">
-                  <button
-                    className={allAreUpscaled ? 'bg-gray-500' : undefined}
-                    onClick={handleUpscale}
-                  >
-                    {allAreUpscaled ? 'Re-' : ''}Upscale
-                  </button>
-                  <ComboBox
-                    className="w-80"
-                    value={upscaleModel}
-                    onSelect={(value) => {
-                      setUpscaleModel(value as UpscaleModel);
-                    }}
-                    items={[
-                      { label: 'Real ESRGAN 4x', value: 'RealESRGAN_x4plus' },
-                      {
-                        label: 'Real ESRGAN 4x Anime',
-                        value: 'RealESRGAN_x4plus_anime_6B',
-                      },
-                      {
-                        label: 'ESRGAN 4x',
-                        value: 'ESRGAN_SRx4',
-                      },
-                    ]}
-                  />
-                </div>
+                <UpscaleButton
+                  allAreUpscaled={allAreUpscaled}
+                  upscaleModel={upscaleModel}
+                  initialUploadImmediately={uploadImmediately}
+                  onUpscale={handleUpscale}
+                  onUpscaleModelChange={setUpscaleModel}
+                  onUploadImmediatelyChanged={setUploadImmediately}
+                />
 
-                <button
-                  className={allAreUploaded ? 'bg-gray-500' : undefined}
-                  onClick={handleUploadToStock}
-                >
-                  {allAreUploaded ? 'Re-' : ''}Upload to stock
-                </button>
+                <UploadToStockButton
+                  allAreUploaded={allAreUploaded}
+                  handleUploadToStock={handleUploadToStock}
+                />
               </>
             )}
           </>

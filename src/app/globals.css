@@ -44,6 +44,7 @@ input, textarea, select, option {
   color: rgb(var(--background-start-rgb));
   background-color: rgb(var(--foreground-rgb));
 }
+
 /* Target the option elements inside the combobox */
 input[role="combobox"] option {
   /* Add your desired styles for the options here */
@@ -73,6 +74,12 @@ input[role="combobox"]::-webkit-calendar-picker-indicator {
 @layer base {
   button {
     @apply w-full p-2 disabled:bg-slate-500 disabled:cursor-not-allowed bg-teal-500 hover:bg-teal-600;
+  }
+  button.cancel{
+    @apply bg-red-500 hover:bg-red-200
+  }
+  button.icon{
+    @apply w-10 h-10 flex justify-center items-center
   }
   h2{
     @apply text-lg

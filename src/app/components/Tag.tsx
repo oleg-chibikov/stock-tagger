@@ -41,7 +41,7 @@ const Tag: FunctionComponent<TagProps> = ({
       </div>
       <div
         className={clsx(
-          'rounded-r focus:outline-none transition-colors',
+          'rounded-r focus:outline-none transition-colors mr-2',
           index !== hoveredIndex ? 'text-white' : 'text-red-500'
         )}
         onClick={() => handleRemoveTag(index)}

@@ -1,10 +1,10 @@
+import { maxTags } from '@appHelpers/tagHelper';
+import { Styleable } from '@components/core/Styleable';
 import { useAppSelector } from '@store/store';
 import { prependTag } from '@store/tagSlice';
 import clsx from 'clsx';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { maxTags } from '../../helpers/tagHelper';
-import { Styleable } from '../core/Styleable';
 
 interface Props extends Styleable {}
 
@@ -25,6 +25,7 @@ const NewTag = ({ className }: Props) => {
   return (
     <div className={clsx('flex', className)}>
       <input
+        disabled={reachedMaxTags}
         type="text"
         value={newTag}
         onChange={(event) => setNewTag(event.target.value)}
@@ -37,14 +38,13 @@ const NewTag = ({ className }: Props) => {
         className="w-full p-2 rounded mr-2"
       />
       <button
-        className="disabled:bg-slate-500 disabled:cursor-not-allowed bg-teal-500 hover:bg-teal-700 py-2 px-2"
         disabled={isEmpty || reachedMaxTags}
         onClick={handleAddTag}
         title={
           reachedMaxTags
             ? `Maximum ${maxTags} tags. Delete tags first to add new`
             : isEmpty
-            ? 'Please enter tag'
+            ? 'Please enter a tag'
             : undefined
         }
       >

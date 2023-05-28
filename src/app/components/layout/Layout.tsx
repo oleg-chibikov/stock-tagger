@@ -1,6 +1,5 @@
 'use client';
 import { withSocket } from '@apiClient/withSocket';
-import { getImageData } from '@appHelpers/imageHelper';
 import { DraggableArea } from '@components/core/DraggableArea';
 import { ZoomImageDisplay } from '@components/core/ZoomImageDisplay';
 import {
@@ -13,6 +12,7 @@ import { setTags } from '@store/tagSlice';
 import { FunctionComponent } from 'react';
 import { Provider, useDispatch } from 'react-redux';
 import { useMediaQuery } from 'react-responsive';
+import { getImageData } from '../../../helpers/imageHelper';
 import { MainSection } from './MainSection';
 import { SidePanel } from './SidePanel';
 

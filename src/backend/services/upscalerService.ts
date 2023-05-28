@@ -2,8 +2,14 @@ import {
   getActivateCondaCommand,
   runCommands,
 } from '@backendHelpers/commandHelper';
+import { deleteFile } from '@backendHelpers/fsHelper';
+import { emitEvent } from '@backendHelpers/socketHelper';
+import { outputPath, toWebUrl } from '@backendHelpers/uploadHelper';
+import { ImageFileData } from '@dataTransferTypes/imageFileData';
 import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import * as path from 'path';
+import { Server } from 'socket.io';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { EventEmitter } from 'stream';
 import { Service } from 'typedi';
 
@@ -27,7 +33,39 @@ class UpscalerService {
     console.log('Installed upscaler service dependencies');
   }
 
-  async upscale(
+  async upscaleWithEvents(
+    io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+    image: ImageFileData,
+    newFileName: string,
+    modelName: UpscaleModel,
+    initialProgress: number = 0,
+    finalProgress: number = 1
+  ): Promise<string | null> {
+    try {
+      emitEvent(io, image.fileName as string, initialProgress, 'upscale');
+      const outputFilePath = await this.upscale(
+        modelName,
+        image.filePath,
+        outputPath,
+        newFileName
+      );
+      emitEvent(
+        io,
+        image.fileName,
+        finalProgress,
+        'upscale_done',
+        toWebUrl(outputFilePath)
+      );
+      return outputFilePath
+    } catch (err: unknown) {
+      emitEvent(io, image.fileName, finalProgress, 'upscale_error');
+      return null;
+    } finally {
+      deleteFile(image.filePath);
+    }
+  }
+
+  private async upscale(
     modelName: UpscaleModel,
     inputFilePath: string,
     outputDirectory: string,
