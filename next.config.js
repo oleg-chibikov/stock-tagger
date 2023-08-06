@@ -20,7 +20,10 @@ const bootServices = async () => {
 
       return JSON.stringify(resJson.bootedServices);
     })
-    .catch(() => false);
+    .catch(async (ex) => {
+      console.error(ex);
+      return false
+    });
 };
 
 module.exports = async (phase, { defaultConfig }) => {
