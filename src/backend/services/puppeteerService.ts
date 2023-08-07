@@ -1,8 +1,14 @@
 import { delay } from '@appHelpers/promiseHelper';
+import {
+  clickBySelector,
+  clickByXPath,
+  selectOptionBySelector,
+  uploadFileBySelector,
+} from '@backendHelpers/puppeteerHelper';
 import * as fs from 'fs';
 import * as os from 'os';
 import path from 'path';
-import puppeteer, { ElementHandle, Page } from 'puppeteer';
+import puppeteer from 'puppeteer';
 import { Service } from 'typedi';
 
 interface PuppeteerResult {
@@ -12,12 +18,6 @@ interface PuppeteerResult {
 
 const chromeExecutablePath = process.env.CHROME_ANOTHER_INSTANCE_PATH;
 const chromeUserDataDir = process.env.CHROME_ANOTHER_INSTANCE_USER_DATA_PATH;
-
-const clickByXPath = async (page: Page, selector: string) => {
-  await page.waitForXPath(selector);
-  const [uploadCsvLink] = await page.$x(selector);
-  await (uploadCsvLink as ElementHandle<Element>).click();
-};
 
 @Service()
 class PuppeteerService {
@@ -52,22 +52,16 @@ class PuppeteerService {
         );
 
         console.log('Upload the file');
-        const fileInputSelector = 'input[type=file]';
-        await page.waitForSelector(fileInputSelector);
-        const fileInputElement = await page.$(fileInputSelector);
-        const filePath = tmpFilePath; // Use the temporary file path
-        await fileInputElement!.uploadFile(filePath);
-
-        const uploadButtonSelector = "button[data-t='csv-modal-upload']";
-        await page.waitForSelector(uploadButtonSelector);
-        await page.click(uploadButtonSelector);
+        await uploadFileBySelector(page, 'input[type=file]', tmpFilePath);
+        await clickBySelector(page, "button[data-t='csv-modal-upload']");
 
         console.log('Click the "Refresh to view changes" button');
-
         await clickByXPath(
           page,
           "//button[contains(@class, 'button') and descendant::span[contains(text(), 'Refresh to view changes')]]"
         );
+
+        await delay(2000);
 
         console.log('Click the checkbox to select all images');
         await clickByXPath(
@@ -81,29 +75,21 @@ class PuppeteerService {
         await clickByXPath(page, '//label[contains(span/span/text(), "No")]');
 
         console.log('Click the Generative AI checkbox');
-        const generativeAiCheckboxSelector =
-          '#content-tagger-generative-ai-checkbox';
-        await page.waitForSelector(generativeAiCheckboxSelector);
-        await page.click(generativeAiCheckboxSelector);
+        await clickBySelector(page, '#content-tagger-generative-ai-checkbox');
 
         console.log('Select the "Illustrations" option');
-        const contentTypeSelector = 'select[aria-label="File type"]';
-        await page.waitForSelector(contentTypeSelector);
-        await page.select(contentTypeSelector, '2');
+        selectOptionBySelector(page, 'select[aria-label="File type"]', '2');
 
         console.log('Click the Submit Button');
-        const submitButtonSelector =
-          "button[data-t='submit-moderation-button']";
-        await page.waitForSelector(submitButtonSelector);
-        await page.click(submitButtonSelector);
+        await clickBySelector(
+          page,
+          "button[data-t='submit-moderation-button']"
+        );
 
         await delay(2000);
 
         console.log('Click the Submit Button in Modal');
-        const submitButtonInModalSelector =
-          "button[data-t='send-moderation-button']";
-        await page.waitForSelector(submitButtonInModalSelector);
-        await page.click(submitButtonInModalSelector);
+        await clickBySelector(page, "button[data-t='send-moderation-button']");
 
         await delay(2000);
       } finally {
@@ -120,5 +106,5 @@ class PuppeteerService {
   }
 }
 
-export type { PuppeteerResult };
 export { PuppeteerService };
+export type { PuppeteerResult };
