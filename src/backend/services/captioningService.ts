@@ -74,18 +74,37 @@ class CaptioningService {
     const chunks = extractChunks(buffer);
     const textChunks = chunks
       .filter((chunk) => chunk.name === 'tEXt')
-      .map((chunk) => text.decode(chunk.data))
+      .map((chunk) => text.decode(chunk.data));
+
+    const parametersChunks = textChunks
       .filter((chunk) => chunk.keyword === 'parameters')
       .map((x) => x.text);
 
-    console.log(`${textChunks.length} text chunks`);
+    const extractTextG = (jsonString: string): string | undefined => {
+      const regex = /"text_g"\s*:\s*"([^"]+)"/g;
+      let match;
 
-    return textChunks.map(sanitize);
+      if ((match = regex.exec(jsonString)) !== null) {
+        return match[1];
+      }
+    };
+
+    const textGChunks = textChunks
+      .filter((x) => x.text.indexOf('"text_g"') !== -1)
+      .map((x) => extractTextG(x.text))
+      .filter((x) => x)
+      .map((x) => x as string);
+
+    const allChunks = parametersChunks.concat(textGChunks);
+
+    console.log(`${allChunks.length} text chunks`);
+
+    return allChunks.map(sanitize);
   };
 
   private getCaptioningDirectory = (localPath: string) =>
     path.join('src', 'backend', 'captioning', localPath);
 }
 
-export type { CaptioningResult };
 export { CaptioningService };
+export type { CaptioningResult };
