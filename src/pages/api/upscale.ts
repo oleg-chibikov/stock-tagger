@@ -22,7 +22,9 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
     await withCancellation(async (cancellationToken) => {
       const images = getFilesFromRequest(files);
       console.log(`Processing ${images.length} images...`);
-      const uploadImmediately = Boolean(fields.uploadImmediately);
+      const uploadImmediately = JSON.parse(
+        fields.uploadImmediately as string
+      ) as boolean;
       if (uploadImmediately) {
         await sftpService.connectIfNeeded(cancellationToken);
       }
