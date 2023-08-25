@@ -55,9 +55,19 @@ const selectOptionBySelector = async (
   await page.select(selector, value);
 };
 
+const getCountOfSelectedElements = async (
+  page: Page,
+  selector: string
+): Promise<number> => {
+  // Evaluate the count of elements that match the criteria
+  const count = await page.$$eval(selector, (elements) => elements.length);
+  return count;
+};
+
 export {
   clickBySelector,
   clickByXPath,
+  getCountOfSelectedElements,
   selectOptionBySelector,
   uploadFileBySelector,
 };
