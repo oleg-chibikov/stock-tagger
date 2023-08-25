@@ -21,6 +21,7 @@ const tagSlice = createSlice({
     prependTag: (state, action: PayloadAction<string>) => {
       const set = new Set(state.tags);
       set.delete(action.payload); // a new tag should be placed to the top so delete the old one if it exists
+      state.tags = Array.from(set);
       state.tags.unshift(action.payload);
     },
   },
