@@ -26,33 +26,31 @@ const bootServices = async () => {
     });
 };
 
+const boot = async () => {
+  const bootedServices = await bootServices();
+  console.log(`bootedServices: ${bootedServices}`);
+}
+
 module.exports = async (phase, { defaultConfig }) => {
   if (process.argv.includes('dev') && phase === PHASE_DEVELOPMENT_SERVER) {
-    console.log('[ next.config.js (dev) ]');
+    console.log('[next.config.js (dev)]');
 
-    const bootedServices = await bootServices();
-
-    console.log(
-      `[ next.config.js (dev) ] => bootedServices: ${bootedServices}`
-    );
+    await boot();
   } else if (
     process.argv.includes('start') &&
     phase === PHASE_PRODUCTION_SERVER
   ) {
-    console.log('[ next.config.js (start) ]');
+    console.log('[next.config.js (start)]');
 
     // Timeout start
     setTimeout(async () => {
-      const bootedServices = await bootServices();
-      console.log(
-        `[ next.config.js (start) ] => bootedServices: ${bootedServices}`
-      );
+      await boot();
     }, 1000);
   } else if (
     process.argv.includes('build') &&
     phase === PHASE_PRODUCTION_BUILD
   ) {
-    console.log('[ next.config.js (build) ]');
+    console.log('[next.config.js (build)]');
 
     // Boot into static pages? getStaticProps ?
     // pages/staticpage.tsx
