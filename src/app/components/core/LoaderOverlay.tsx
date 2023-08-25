@@ -13,7 +13,7 @@ const LoaderOverlay: FunctionComponent<LoaderOverlayProps> = ({
   return (
     <div className="relative">
       {isLoading && (
-        <div className="z-10 absolute inset-0 flex justify-center items-center">
+        <div className="z-10 absolute inset-0 flex justify-center items-center pointer-events-none">
           <Loader />
         </div>
       )}
