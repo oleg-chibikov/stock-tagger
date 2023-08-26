@@ -112,8 +112,17 @@ class PuppeteerService {
 
         await delay(1000);
 
-        console.log('Click the Submit Button in Modal');
-        await clickBySelector(page, "button[data-t='send-moderation-button']");
+        console.log('Click the Reviewed Guidelines');
+        await clickBySelector(page, '#tc-reviewed-guidelines');
+
+        console.log('Click the Understand Guidelines');
+        await clickBySelector(page, '#tc-understand-guidelines');
+
+        console.log('Click the Continue Button in Modal');
+        await clickBySelector(
+          page,
+          "button[data-t='continue-moderation-button']"
+        );
 
         await delay(2000);
       } finally {

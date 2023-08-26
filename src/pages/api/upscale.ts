@@ -23,7 +23,7 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
       const images = getFilesFromRequest(files);
       console.log(`Processing ${images.length} images...`);
       const uploadImmediately = JSON.parse(
-        fields.uploadImmediately as string
+        fields.uploadImmediately as unknown as string
       ) as boolean;
       if (uploadImmediately) {
         await sftpService.connectIfNeeded(cancellationToken);
@@ -40,7 +40,7 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
           io,
           convertedImage,
           image.newFilename,
-          fields.modelName as UpscaleModel,
+          fields.modelName as unknown as UpscaleModel,
           0,
           uploadImmediately ? 0.5 : 1
         );

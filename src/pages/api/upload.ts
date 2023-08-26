@@ -53,7 +53,7 @@ const uploadToSftp = async (req: NextApiRequest, res: NextApiResponse) => {
               ({
                 filePath: x.filepath,
                 fileName: x.originalFilename as string,
-              } as ImageFileData)
+              }) as ImageFileData
           );
 
           await uploadImagesToFtp(notUpscaledImages, cancellationToken);
@@ -63,7 +63,7 @@ const uploadToSftp = async (req: NextApiRequest, res: NextApiResponse) => {
         const upscaledImages = fields?.upscaledImagesData;
         if (upscaledImages?.length) {
           const imagesFileData = JSON.parse(
-            upscaledImages as string
+            upscaledImages as unknown as string
           ) as ImageFileData[];
           console.log(`Uploading ${imagesFileData.length} upscaled images...`);
           for (const image of imagesFileData) {
