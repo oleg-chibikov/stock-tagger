@@ -2,6 +2,7 @@ import { CANCEL } from '@dataTransferTypes/event';
 import { Operation } from '@dataTransferTypes/operation';
 import EventEmitter from 'events';
 import Container from 'typedi';
+import { collectionToString, hasIntersection } from './collectionHelper';
 
 type CancellationCallback = (...params: any) => any;
 
@@ -36,25 +37,53 @@ class CancellationToken {
   }
 }
 
-const withCancellation = async (
-  action: (cancellationToken: CancellationToken) => Promise<void>,
-  operation: Operation
+const withMultiOperationsCancellation = async (
+  operations: Set<Operation>,
+  action: (cancellationToken: CancellationToken) => Promise<void>
 ) => {
+  console.log(
+    `Listening for cancellations for ${collectionToString(operations)}`
+  );
   const eventEmitter = Container.get(EventEmitter);
   const cancellationToken = new CancellationToken();
-  const cancelHandler = (op: Operation) => {
-    if (op === operation) {
-      console.log(`Got ${operation} cancellation request from event emitter`);
+  const cancelHandler = (operationsToCancel: Operation[]) => {
+    console.log(
+      `[cancellationToken] Got ${collectionToString(
+        operationsToCancel
+      )} cancellation request from event emitter`
+    );
+    if (hasIntersection(operations, operationsToCancel)) {
+      console.log(
+        `Cancelling ${collectionToString(operationsToCancel)} operations...`
+      );
       cancellationToken.cancel();
+    } else {
+      console.log(
+        `Skip ${collectionToString(
+          operationsToCancel
+        )} cancellation request from event emitter. Current operations: ${collectionToString(
+          operations
+        )}`
+      );
     }
   };
   eventEmitter.on(CANCEL, cancelHandler);
   try {
     await action(cancellationToken);
+  } catch (e) {
+    if (cancellationToken.isCancellationRequested) {
+      return Promise.resolve();
+    }
+    throw e;
   } finally {
     eventEmitter.off(CANCEL, cancelHandler);
     cancellationToken.clearCallbacks();
   }
 };
 
-export { withCancellation, CancellationToken };
+const withCancellation = async (
+  operation: Operation,
+  action: (cancellationToken: CancellationToken) => Promise<void>
+) => withMultiOperationsCancellation(new Set<Operation>([operation]), action);
+
+export { CancellationToken, withCancellation, withMultiOperationsCancellation };

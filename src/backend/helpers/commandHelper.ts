@@ -1,3 +1,4 @@
+import { collectionToString } from '@appHelpers/collectionHelper';
 import { CANCEL } from '@dataTransferTypes/event';
 import { Operation } from '@dataTransferTypes/operation';
 import { spawn } from 'child_process';
@@ -19,22 +20,31 @@ const runCommands = async (
   workingDir?: string,
   eventEmitter?: EventEmitter,
   operation?: Operation
-): Promise<string> => {
-  return new Promise<string>((resolve, reject) => {
+): Promise<string> =>
+  new Promise<string>((resolve, reject) => {
     const commandString = commands.join(' && ');
     console.log(`Executing ${commandString}...`);
     const childProcess = spawn(commandString, { shell: true, cwd: workingDir });
 
     let output = '';
     let error = '';
-    let cancelHandler = (cancelOperation: Operation) => {
-      if (operation === cancelOperation) {
-        console.log(`Killing spawned process for ${cancelOperation}...`);
+    let cancelHandler = (operationsToCancel: Operation[]) => {
+      if (!operation) {
+        return;
+      }
+      console.log(
+        `[commandHelper] Got ${collectionToString(
+          operationsToCancel
+        )} cancellation request from event emitter. Currently executing operation is ${operation}`
+      );
+      const set = new Set(operationsToCancel);
+      if (set.has(operation)) {
+        console.log(`Killing spawned process for ${operation}...`);
         const killResult = childProcess.kill();
         console.log(
-          `Spawned process for ${cancelOperation} kill result: ${killResult}`
+          `Spawned process for ${operation} kill result: ${killResult}`
         );
-        resolve('Cancelled');
+        reject(`Cancelled ${operation}`);
       }
     };
 
@@ -60,6 +70,5 @@ const runCommands = async (
       eventEmitter?.off(CANCEL, cancelHandler);
     });
   });
-};
 
-export { getCondaPath, getActivateCondaCommand, runCommands };
+export { getActivateCondaCommand, getCondaPath, runCommands };

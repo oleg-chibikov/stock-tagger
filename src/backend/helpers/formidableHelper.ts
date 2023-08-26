@@ -20,9 +20,11 @@ const processRequestWithFiles = (
     }
     try {
       await process(fields, files);
+      res.status(200).end();
     } catch (error: any) {
-      console.error(err);
-      res.status(500).send('Cannot process request: ' + error);
+      const e = 'Cannot process request: ' + error;
+      console.error(e);
+      res.status(500).send(e);
     }
   });
 };
@@ -41,4 +43,4 @@ const convertToImageFileData = (file: File): ImageFileData => {
   };
 };
 
-export { convertToImageFileData, processRequestWithFiles, getFilesFromRequest };
+export { convertToImageFileData, getFilesFromRequest, processRequestWithFiles };

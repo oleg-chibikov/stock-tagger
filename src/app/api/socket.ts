@@ -3,8 +3,8 @@ import { io, Socket } from 'socket.io-client';
 let socket: Socket | null = null;
 let isSocketInitializing = false;
 
-const initializeSocket = () => {
-  return new Promise<Socket>((resolve, reject) => {
+const initializeSocket = () =>
+  new Promise<Socket>((resolve, reject) => {
     if (socket) {
       resolve(socket);
     } else {
@@ -28,7 +28,6 @@ const initializeSocket = () => {
       });
     }
   });
-};
 
 const getSocket = async (): Promise<Socket> => {
   if (socket) {

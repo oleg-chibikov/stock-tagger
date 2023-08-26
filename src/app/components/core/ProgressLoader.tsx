@@ -1,4 +1,4 @@
-import { cancelOperation } from '@apiClient/backendApiClient';
+import { cancelOperations } from '@apiClient/backendApiClient';
 import { Operation } from '@dataTransferTypes/operation';
 import { OperationStatus } from '@dataTransferTypes/operationStatus';
 import clsx from 'clsx';
@@ -7,7 +7,7 @@ import { FaTimes } from 'react-icons/fa';
 import { Styleable } from './Styleable';
 
 interface ProgressLoadersProps extends Styleable {
-  operation: Operation;
+  operations: Operation[];
   uploadProgress: Record<string, ProgressState>;
 }
 
@@ -37,11 +37,11 @@ const operationToString = (operation: OperationStatus) => {
 
 const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
   uploadProgress,
-  operation,
+  operations,
   className,
 }) => {
   const handleCancel = async () => {
-    await cancelOperation(operation);
+    await cancelOperations(operations);
   };
   return (
     <>
@@ -71,7 +71,7 @@ const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
           );
         })}
       </div>
-      <button title="Cancel" className="cancel" onClick={() => handleCancel()}>
+      <button title="Cancel" className="cancel" onClick={handleCancel}>
         <FaTimes />
       </button>
     </>

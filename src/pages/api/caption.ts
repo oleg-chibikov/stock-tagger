@@ -39,7 +39,7 @@ const getCaptions = async (req: NextApiRequest, res: NextApiResponse) => {
     const images = getFilesFromRequest(files);
     const annotationsPath = `annotations\\${process.env.CAPTIONING_DATASET}.json`;
 
-    await withCancellation(async (cancellationToken) => {
+    await withCancellation('caption', async (cancellationToken) => {
       for (const image of images.filter((x) =>
         x.newFilename.match(/\.(png)$/i)
       )) {
@@ -96,9 +96,7 @@ const getCaptions = async (req: NextApiRequest, res: NextApiResponse) => {
           deleteFile(image.filepath);
         }
       }
-
-      res.status(200).end();
-    }, 'caption');
+    });
   });
 };
 

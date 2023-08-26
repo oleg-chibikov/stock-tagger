@@ -50,15 +50,41 @@ class SftpService {
   }
 
   async connectIfNeeded(cancellationToken: CancellationToken): Promise<void> {
-    if (!(await this.isConnected(cancellationToken))) {
-      await this.connect(cancellationToken);
-    }
+    return new Promise(async (resolve, reject) => {
+      cancellationToken.addCancellationCallback(reject);
+      console.log('Checking SFTP connection...');
+      const sftpConfig = {
+        host: process.env.SFTP_HOST,
+        port: parseInt(process.env.SFTP_PORT ?? ''),
+        username: process.env.SFTP_USERNAME,
+        password: process.env.SFTP_PASSWORD,
+      };
+      try {
+        await this.sftp.list('/remote/directory');
+        // Listing succeeded, indicating the client is connected
+        console.log('Already connected to SFTP');
+        resolve();
+      } catch (error) {
+        // Listing failed, indicating the client is not connected
+        console.log('SFTP Client is not yet connected. Connecting...');
+        try {
+          await this.sftp.connect(sftpConfig);
+          console.log('Connected to SFTP');
+          resolve();
+        } catch (error) {
+          console.error(`Failed to connect to SFTP: ${error}`);
+          reject();
+        }
+      } finally {
+        cancellationToken.removeCancellationCallback(reject);
+      }
+    });
   }
 
   async disconnect(cancellationToken: CancellationToken) {
     console.log('Disconnecting from SFTP...');
     return new Promise<void>(async (resolve, reject) => {
-      cancellationToken.addCancellationCallback(resolve);
+      cancellationToken.addCancellationCallback(reject);
       try {
         await this.sftp.end();
         console.log(`Disconnected from SFTP`);
@@ -67,7 +93,7 @@ class SftpService {
         console.error(`Failed to disconnect from SFTP: ${error}`);
         reject();
       } finally {
-        cancellationToken.removeCancellationCallback(resolve);
+        cancellationToken.removeCancellationCallback(reject);
       }
     });
   }
@@ -86,6 +112,9 @@ class SftpService {
         image.filePath,
         image.fileName,
         (fileName, progress) => {
+          if (cancellationToken.isCancellationRequested) {
+            return;
+          }
           // Emit an event with the progress of the file transfer
           emitEvent(
             io,
@@ -111,7 +140,7 @@ class SftpService {
   ): Promise<void> {
     console.log(`Uploading ${filePath} to SFTP (${fileName})...`);
     return new Promise<void>(async (resolve, reject) => {
-      cancellationToken.addCancellationCallback(resolve);
+      cancellationToken.addCancellationCallback(reject);
       try {
         await this.sftp.fastPut(filePath, fileName, {
           concurrency: 64,
@@ -132,52 +161,7 @@ class SftpService {
         console.error(`Upload failed for ${fileName}: ${error}`);
         reject(error);
       } finally {
-        cancellationToken.removeCancellationCallback(resolve);
-      }
-    });
-  }
-
-  private async isConnected(
-    cancellationToken: CancellationToken
-  ): Promise<boolean> {
-    return new Promise(async (resolve, reject) => {
-      cancellationToken.addCancellationCallback(resolve);
-      // Check if connected
-      try {
-        await this.sftp.list('/remote/directory');
-        // Listing succeeded, indicating the client is connected
-        console.log('Client is connected');
-        resolve(true);
-      } catch (error) {
-        // Listing failed, indicating the client is not connected
-        console.log('Client is not connected');
-        resolve(false);
-      } finally {
-        cancellationToken.removeCancellationCallback(resolve);
-      }
-    });
-  }
-
-  private async connect(cancellationToken: CancellationToken) {
-    console.log('Connecting to SFTP...');
-    const sftpConfig = {
-      host: process.env.SFTP_HOST,
-      port: parseInt(process.env.SFTP_PORT ?? ''),
-      username: process.env.SFTP_USERNAME,
-      password: process.env.SFTP_PASSWORD,
-    };
-
-    return new Promise<void>(async (resolve, reject) => {
-      cancellationToken.addCancellationCallback(resolve);
-      try {
-        await this.sftp.connect(sftpConfig);
-        console.log('Connected to SFTP');
-        resolve();
-      } catch (error) {
-        console.error(`Failed to connect to SFTP: ${error}`);
-        reject();
-      } finally {
-        cancellationToken.removeCancellationCallback(resolve);
+        cancellationToken.removeCancellationCallback(reject);
       }
     });
   }

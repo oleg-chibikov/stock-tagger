@@ -1,4 +1,4 @@
-import { cancelOperation, getCaptions } from '@apiClient/backendApiClient';
+import { cancelOperations, getCaptions } from '@apiClient/backendApiClient';
 import { uploadImageAndGetTags } from '@apiClient/imaggaApiClient';
 import { getUniqueTags } from '@appHelpers/tagHelper';
 import { Loader } from '@components/core/Loader';
@@ -74,7 +74,7 @@ export function RetrieveTagsButton({
           <button
             className="icon cancel"
             title="Cancel"
-            onClick={() => cancelOperation('caption')}
+            onClick={() => cancelOperations('caption')}
           >
             <FaTimes />
           </button>

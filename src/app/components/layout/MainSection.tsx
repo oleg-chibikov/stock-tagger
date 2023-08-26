@@ -56,7 +56,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
   const [upscaleModel, setUpscaleModel] =
     useState<UpscaleModel>('RealESRGAN_x4plus');
   const [uploadImmediately, setUploadImmediately] = useState(true);
-  const [operation, setOperation] = useState<Operation>('unknown');
+  const [operations, setOperations] = useState<Operation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<
     Record<string, ProgressState>
@@ -81,7 +81,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
   }, [dispatch, images]);
 
   const processImages = async (
-    operation: Operation,
+    operations: Operation[],
     action: (
       onProgress: (event: UploadEvent) => void,
       imageData: ImageWithData[]
@@ -97,7 +97,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
     if (!imagesToProcess.length) {
       return;
     }
-    setOperation(operation);
+    setOperations(operations);
     setIsLoading(true);
     try {
       const initialProgress: Record<string, ProgressState> = {};
@@ -138,7 +138,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
 
   const handleUpscale = () =>
     processImages(
-      'upscale',
+      uploadImmediately ? ['upscale', 'ftp_upload'] : ['upscale'],
       (onProgress, imageData) => {
         const dataToProcess = allAreUpscaled
           ? imageData
@@ -157,7 +157,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
 
   const handleUploadToStock = () =>
     processImages(
-      'ftp_upload',
+      ['ftp_upload'],
       (onProgress, imageData) => {
         const notUpscaledImages = getNotUpscaledImages(imageData);
         const upscaledImages = getUpscaledImages(imageData).map(
@@ -165,7 +165,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
             ({
               fileName: x.name,
               filePath: x.upscaledUri,
-            } as ImageFileData)
+            }) as ImageFileData
         );
         return uploadToSftp(onProgress, notUpscaledImages, upscaledImages);
       },
@@ -197,7 +197,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
             {isLoading && (
               <ProgressLoader
                 uploadProgress={uploadProgress}
-                operation={operation}
+                operations={operations}
               />
             )}
             {!isLoading && (

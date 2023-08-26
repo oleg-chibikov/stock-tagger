@@ -35,49 +35,44 @@ const uploadToSftp = async (req: NextApiRequest, res: NextApiResponse) => {
     }
   };
 
-  processRequestWithFiles(req, res, async (fields, files) => {
-    return new Promise<void>(async (resolve, reject) => {
-      withCancellation(async (cancellationToken) => {
-        cancellationToken.addCancellationCallback(async () => {
-          await sftpService.disconnect(cancellationToken);
-          resolve();
-        });
+  processRequestWithFiles(req, res, async (fields, files) =>
+    withCancellation('ftp_upload', async (cancellationToken) => {
+      cancellationToken.addCancellationCallback(async () => {
+        await sftpService.disconnect(cancellationToken);
+      });
+      await sftpService.connectIfNeeded(cancellationToken);
 
-        await sftpService.connectIfNeeded(cancellationToken);
-        const images = getFilesFromRequest(files);
-        if (images.length) {
-          console.log(`Uploading ${images.length} original images...`);
+      const images = getFilesFromRequest(files);
+      if (images.length) {
+        console.log(`Uploading ${images.length} original images...`);
 
-          const notUpscaledImages = images.map(
-            (x) =>
-              ({
-                filePath: x.filepath,
-                fileName: x.originalFilename as string,
-              }) as ImageFileData
-          );
+        const notUpscaledImages = images.map(
+          (x) =>
+            ({
+              filePath: x.filepath,
+              fileName: x.originalFilename as string,
+            }) as ImageFileData
+        );
 
-          await uploadImagesToFtp(notUpscaledImages, cancellationToken);
-          console.log('Uploaded all original images');
+        await uploadImagesToFtp(notUpscaledImages, cancellationToken);
+        console.log('Uploaded all original images');
+      }
+
+      const upscaledImages = fields?.upscaledImagesData;
+      if (upscaledImages?.length) {
+        const imagesFileData = JSON.parse(
+          upscaledImages as unknown as string
+        ) as ImageFileData[];
+        console.log(`Uploading ${imagesFileData.length} upscaled images...`);
+        for (const image of imagesFileData) {
+          image.filePath = toServerUrl(image.filePath);
         }
 
-        const upscaledImages = fields?.upscaledImagesData;
-        if (upscaledImages?.length) {
-          const imagesFileData = JSON.parse(
-            upscaledImages as unknown as string
-          ) as ImageFileData[];
-          console.log(`Uploading ${imagesFileData.length} upscaled images...`);
-          for (const image of imagesFileData) {
-            image.filePath = toServerUrl(image.filePath);
-          }
-
-          await uploadImagesToFtp(imagesFileData, cancellationToken);
-          console.log('Uploaded all upscaled images');
-        }
-
-        res.status(200).end();
-      }, 'ftp_upload');
-    });
-  });
+        await uploadImagesToFtp(imagesFileData, cancellationToken);
+        console.log('Uploaded all upscaled images');
+      }
+    })
+  );
 };
 
 export const config = {

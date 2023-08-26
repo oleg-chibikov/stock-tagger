@@ -1,3 +1,4 @@
+import { collectionToString } from '@appHelpers/collectionHelper';
 import { delay } from '@appHelpers/promiseHelper';
 import { CaptionEvent } from '@dataTransferTypes/caption';
 import { CANCEL, CAPTION_AVAILIABLE, PROGRESS } from '@dataTransferTypes/event';
@@ -128,13 +129,15 @@ const postImages = async <TData>(
   });
 };
 
-const cancelOperation = async (operation: Operation) => {
+const cancelOperations = async (operations: Operation[]) => {
   const socket = await getSocket();
-  socket.emit(CANCEL, operation);
-  console.log(`Emitted cancellation request for ${operation}`);
+  socket.emit(CANCEL, operations);
+  console.log(
+    `Emitted cancellation request for ${collectionToString(operations)}`
+  );
 };
 
 const isSuccessResponse = (response: AxiosResponse<unknown, unknown>) =>
   response.status >= 200 && response.status < 300;
 
-export { uploadCsv, upscale, uploadToSftp, getCaptions, cancelOperation };
+export { cancelOperations, getCaptions, uploadCsv, uploadToSftp, upscale };

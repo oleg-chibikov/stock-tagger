@@ -1,3 +1,4 @@
+import { collectionToString } from '@appHelpers/collectionHelper';
 import { apiHandler } from '@backendHelpers/apiHelper';
 import { CANCEL } from '@dataTransferTypes/event';
 import { Operation } from '@dataTransferTypes/operation';
@@ -46,9 +47,13 @@ const handle = async (_req: NextApiRequest, res: NextApiResponse) => {
     io.on('connect', (socket: IOSocket) => {
       console.log('Socket connected: ' + socket.id);
 
-      socket.on(CANCEL, (data: Operation) => {
-        console.log(`Got cancellation request for ${data} operation`);
-        eventEmitter.emit(CANCEL, data);
+      socket.on(CANCEL, (operations: Operation[]) => {
+        console.log(
+          `Got cancellation request for ${collectionToString(
+            operations
+          )} operations`
+        );
+        eventEmitter.emit(CANCEL, operations);
       });
     });
     io.on('disconnect', (socket: IOSocket) => {
