@@ -1,9 +1,9 @@
+import { CancellationToken } from '@appHelpers/cancellationToken';
 import {
   getActivateCondaCommand,
   runCommands,
 } from '@backendHelpers/commandHelper';
 import { sanitize } from '@backendHelpers/promptHelper';
-import EventEmitter from 'events';
 import path from 'path';
 import text from 'png-chunk-text';
 import extractChunks from 'png-chunks-extract';
@@ -16,7 +16,7 @@ interface CaptioningResult {
 
 @Service()
 class CaptioningService {
-  constructor(private eventEmitter: EventEmitter) {}
+  constructor() {}
   async installDependencies(): Promise<void> {
     console.log('Installing captioning service dependencies...');
     await runCommands(
@@ -29,6 +29,7 @@ class CaptioningService {
   async generateCaptions(
     imagePath: string,
     annotationsPath: string,
+    cancellationToken: CancellationToken,
     batchSize = 32,
     numberOfAnnotations = 600,
     numberOfResults = 10
@@ -43,8 +44,7 @@ class CaptioningService {
         )}" --batch_size ${batchSize} --num_samples ${numberOfAnnotations} --num_results ${numberOfResults}`,
       ],
       process.cwd(),
-      this.eventEmitter,
-      'caption'
+      cancellationToken
     );
     const lines = output.split('\n');
     const startIndex = lines.findIndex((line) =>

@@ -1,8 +1,5 @@
-import { collectionToString } from '@appHelpers/collectionHelper';
-import { CANCEL } from '@dataTransferTypes/event';
-import { Operation } from '@dataTransferTypes/operation';
+import { CancellationToken } from '@appHelpers/cancellationToken';
 import { spawn } from 'child_process';
-import EventEmitter from 'events';
 import path from 'path';
 
 const getCondaPath = () =>
@@ -18,8 +15,7 @@ const getActivateCondaCommand = (): string =>
 const runCommands = async (
   commands: string[],
   workingDir?: string,
-  eventEmitter?: EventEmitter,
-  operation?: Operation
+  cancellationToken?: CancellationToken
 ): Promise<string> =>
   new Promise<string>((resolve, reject) => {
     const commandString = commands.join(' && ');
@@ -28,27 +24,14 @@ const runCommands = async (
 
     let output = '';
     let error = '';
-    let cancelHandler = (operationsToCancel: Operation[]) => {
-      if (!operation) {
-        return;
-      }
-      console.log(
-        `[commandHelper] Got ${collectionToString(
-          operationsToCancel
-        )} cancellation request from event emitter. Currently executing operation is ${operation}`
-      );
-      const set = new Set(operationsToCancel);
-      if (set.has(operation)) {
-        console.log(`Killing spawned process for ${operation}...`);
-        const killResult = childProcess.kill();
-        console.log(
-          `Spawned process for ${operation} kill result: ${killResult}`
-        );
-        reject(`Cancelled ${operation}`);
-      }
+    let cancelHandler = () => {
+      console.log(`Killing spawned process...`);
+      const killResult = childProcess.kill();
+      console.log(`Spawned process for kill result: ${killResult}`);
+      reject(`Cancelled`);
     };
 
-    eventEmitter?.on(CANCEL, cancelHandler);
+    cancellationToken?.addCancellationCallback(cancelHandler);
 
     // Log output from the child process
     childProcess.stdout.on('data', (data) => {
@@ -67,7 +50,7 @@ const runCommands = async (
       } else {
         resolve(output);
       }
-      eventEmitter?.off(CANCEL, cancelHandler);
+      cancellationToken?.removeCancellationCallback(cancelHandler);
     });
   });
 

@@ -59,6 +59,7 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
               convertedImage,
               image.newFilename,
               fields.modelName as unknown as UpscaleModel,
+              cancellationToken,
               0,
               uploadImmediately ? 0.5 : 1
             );

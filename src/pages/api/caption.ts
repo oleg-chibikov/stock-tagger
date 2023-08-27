@@ -78,6 +78,7 @@ const getCaptions = async (req: NextApiRequest, res: NextApiResponse) => {
             await captioningService.generateCaptions(
               image.filepath,
               annotationsPath,
+              cancellationToken,
               batchSize,
               numberOfAnnotations,
               numberOfResults

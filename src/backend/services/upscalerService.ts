@@ -1,3 +1,4 @@
+import { CancellationToken } from '@appHelpers/cancellationToken';
 import {
   getActivateCondaCommand,
   runCommands,
@@ -10,12 +11,11 @@ import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import * as path from 'path';
 import { Server } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import { EventEmitter } from 'stream';
 import { Service } from 'typedi';
 
 @Service()
 class UpscalerService {
-  constructor(private eventEmitter: EventEmitter) {}
+  constructor() {}
   async installDependencies(): Promise<void> {
     console.log('Installing upscaler service dependencies...');
     await runCommands(
@@ -38,6 +38,7 @@ class UpscalerService {
     image: ImageFileData,
     newFileName: string,
     modelName: UpscaleModel,
+    cancellationToken: CancellationToken,
     initialProgress: number = 0,
     finalProgress: number = 1
   ): Promise<string | null> {
@@ -47,7 +48,8 @@ class UpscalerService {
         modelName,
         image.filePath,
         outputPath,
-        newFileName
+        newFileName,
+        cancellationToken
       );
       emitEvent(
         io,
@@ -56,7 +58,7 @@ class UpscalerService {
         'upscale_done',
         toWebUrl(outputFilePath)
       );
-      return outputFilePath
+      return outputFilePath;
     } catch (err: unknown) {
       emitEvent(io, image.fileName, finalProgress, 'upscale_error');
       return null;
@@ -69,7 +71,8 @@ class UpscalerService {
     modelName: UpscaleModel,
     inputFilePath: string,
     outputDirectory: string,
-    fileName: string
+    fileName: string,
+    cancellationToken: CancellationToken
   ): Promise<string> {
     console.log(
       `Upscaling ${fileName} (${inputFilePath}) and saving it as ${outputDirectory}...`
@@ -89,8 +92,7 @@ class UpscalerService {
         )}" --input "${inputFilePath}" --output "${outputDirectory}" ${modelArgument} --tile 256`,
       ],
       process.env.ESRGAN_PATH,
-      this.eventEmitter,
-      'upscale'
+      cancellationToken
     );
     console.log(`Finished upscaling ${fileName}`);
     const parsed = path.parse(fileName);

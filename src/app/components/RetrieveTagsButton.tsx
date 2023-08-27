@@ -74,7 +74,7 @@ export function RetrieveTagsButton({
           <button
             className="icon cancel"
             title="Cancel"
-            onClick={() => cancelOperations('caption')}
+            onClick={() => cancelOperations(['caption'])}
           >
             <FaTimes />
           </button>
