@@ -1,4 +1,5 @@
 import { CancellationToken } from '@appHelpers/cancellationToken';
+import { throttle } from '@appHelpers/throttle';
 import { emitEvent } from '@backendHelpers/socketHelper';
 import { ImageFileData } from '@dataTransferTypes/imageFileData';
 import { Server } from 'socket.io';
@@ -111,7 +112,8 @@ class SftpService {
       await this.uploadToSftp(
         image.filePath,
         image.fileName,
-        (fileName, progress) => {
+        // throttling is needed as too many events might reset the socket connection and some events are lost in this case
+        throttle((fileName, progress) => {
           if (cancellationToken.isCancellationRequested) {
             return;
           }
@@ -122,7 +124,7 @@ class SftpService {
             initialProgress + progress * range,
             'ftp_upload'
           );
-        },
+        }, 200),
         cancellationToken
       );
       emitEvent(io, image.fileName as string, finalProgress, 'ftp_upload_done');
