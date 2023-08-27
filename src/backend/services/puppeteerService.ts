@@ -110,8 +110,6 @@ class PuppeteerService {
           "button[data-t='submit-moderation-button']"
         );
 
-        await delay(1000);
-
         console.log('Click the Reviewed Guidelines');
         await clickBySelector(page, '#tc-reviewed-guidelines');
 
@@ -123,6 +121,9 @@ class PuppeteerService {
           page,
           "button[data-t='continue-moderation-button']"
         );
+
+        console.log('Click the Send Button in Modal');
+        await clickBySelector(page, "button[data-t='send-moderation-button']");
 
         await delay(2000);
       } finally {
