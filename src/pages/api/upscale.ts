@@ -9,7 +9,9 @@ import { UpscaleModel } from '@dataTransferTypes/upscaleModel';
 import { SftpService } from '@services/sftpService';
 import { UpscalerService } from '@services/upscalerService';
 import { NextApiRequest, NextApiResponse } from 'next';
+import Queue from 'queue-promise';
 import Container from 'typedi';
+
 import { NextApiResponseWithSocket } from './socketio';
 
 const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -22,55 +24,77 @@ const upscale = async (req: NextApiRequest, res: NextApiResponse) => {
     const uploadImmediately = JSON.parse(
       fields.uploadImmediately as unknown as string
     ) as boolean;
+    const upscaleQueue = new Queue({
+      concurrent: 1,
+    });
+    const uploadQueue = uploadImmediately
+      ? new Queue({
+          concurrent: 1,
+        })
+      : undefined;
     await withMultiOperationsCancellation(
       new Set(uploadImmediately ? ['upscale', 'ftp_upload'] : ['upscale']),
-      async (cancellationToken) => {
-        if (uploadImmediately) {
-          cancellationToken.addCancellationCallback(async () => {
-            await sftpService.disconnect(cancellationToken);
+      async (cancellationToken) =>
+        await new Promise(async (resolve, reject) => {
+          if (uploadImmediately) {
+            cancellationToken.addCancellationCallback(async () => {
+              await sftpService.disconnect(cancellationToken);
+            });
+            uploadQueue?.enqueue(() =>
+              sftpService.connectIfNeeded(cancellationToken)
+            );
+          }
+          const images = getFilesFromRequest(files);
+          console.log(`Processing ${images.length} images...`);
+          let upscaleFinished = false;
+          let uploadFinished = !uploadImmediately;
+          const upscaleTasks = images.map((image) => async () => {
+            if (cancellationToken.isCancellationRequested) {
+              reject();
+              return Promise.reject();
+            }
+            const convertedImage = convertToImageFileData(image);
+            const upscaledFilePath = await upscalerService.upscaleWithEvents(
+              io,
+              convertedImage,
+              image.newFilename,
+              fields.modelName as unknown as UpscaleModel,
+              0,
+              uploadImmediately ? 0.5 : 1
+            );
+            if (upscaledFilePath && uploadImmediately) {
+              convertedImage.filePath = upscaledFilePath;
+              uploadFinished = false;
+              uploadQueue?.enqueue(() => {
+                if (cancellationToken.isCancellationRequested) {
+                  reject();
+                  return Promise.reject();
+                }
+                return sftpService.uploadWithEvents(
+                  io,
+                  convertedImage,
+                  cancellationToken,
+                  0.5
+                );
+              });
+            }
           });
-        }
-        const images = getFilesFromRequest(files);
-        console.log(`Processing ${images.length} images...`);
+          const resolveWhenDone = () => {
+            if (uploadFinished && upscaleFinished) {
+              resolve();
+            }
+          };
+          upscaleQueue.enqueue(upscaleTasks);
+          uploadQueue?.on('end', () => {
+            uploadFinished = true;
+            resolveWhenDone();
+          });
 
-        let ftpConnectionPromise = Promise.resolve();
-
-        const uploadPromises = [];
-        // Sequentially executing as upscaling is a GPU heavy operation and hardly can be run in parallel
-        let index = 0;
-        for (const image of images) {
-          if (cancellationToken.isCancellationRequested) {
-            break;
-          }
-          if (uploadImmediately && index++ === 0) {
-            ftpConnectionPromise =
-              sftpService.connectIfNeeded(cancellationToken);
-          }
-          const convertedImage = convertToImageFileData(image);
-          const upscaledFilePath = await upscalerService.upscaleWithEvents(
-            io,
-            convertedImage,
-            image.newFilename,
-            fields.modelName as unknown as UpscaleModel,
-            0,
-            uploadImmediately ? 0.5 : 1
-          );
-          if (upscaledFilePath && uploadImmediately) {
-            await ftpConnectionPromise; // wait until the connection is initialized
-            convertedImage.filePath = upscaledFilePath;
-            uploadPromises.push(
-              sftpService.uploadWithEvents(
-                io,
-                convertedImage,
-                cancellationToken,
-                0.5
-              )
-            ); // No await here, remember promise to await later (we want the next upscale operation to start without waiting for upload)
-          }
-        }
-
-        await Promise.all(uploadPromises); // wait for the rest of upload opeartions.
-      }
+          upscaleQueue.on('end', () => {
+            upscaleFinished = true;
+            resolveWhenDone();
+          });
+        })
     );
   });
 };
