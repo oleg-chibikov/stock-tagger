@@ -1,6 +1,5 @@
 'use client';
 import { withSocket } from '@apiClient/withSocket';
-import { DraggableArea } from '@components/core/DraggableArea';
 import { ZoomImageDisplay } from '@components/core/ZoomImageDisplay';
 import {
   setAllAreUploaded,
@@ -62,16 +61,13 @@ const InnerLayout: FunctionComponent = () => {
   };
 
   return (
-    <DraggableArea
-      onDropFiles={processUploadedFiles}
-      className={containerStyles}
-    >
+    <div className={containerStyles}>
       <ZoomImageDisplay />
       <MainSection processUploadedFiles={processUploadedFiles} />
       <SidePanel
         className={isSmallScreen ? 'w-full' : 'flex-shrink-0 flex-grow-0 w-1/3'}
       />
-    </DraggableArea>
+    </div>
   );
 };
 const LayoutWithSocket = withSocket(Layout);

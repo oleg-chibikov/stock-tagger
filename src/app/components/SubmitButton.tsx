@@ -1,10 +1,11 @@
-import { uploadCsv } from '@apiClient/backendApiClient';
+import { cancelOperations, uploadCsv } from '@apiClient/backendApiClient';
 import { createCSVData } from '@appHelpers/csvHelper';
 import { getNotUploadedImages } from '@appHelpers/imageHelper';
 import { TagsButtonProps } from '@components/DownloadButton';
 import { Loader } from '@components/core/Loader';
 import { FunctionComponent, useEffect, useState } from 'react';
 import { FaCheck } from 'react-icons/fa';
+import { CancelButton } from './core/CancelButton';
 
 const SubmitButton: FunctionComponent<TagsButtonProps> = ({
   images,
@@ -24,7 +25,7 @@ const SubmitButton: FunctionComponent<TagsButtonProps> = ({
   const uploadTagsAndSubmitImages = async () => {
     setIsLoading(true);
     try {
-      const csvData = createCSVData(images, tags, title, true, category);
+      const csvData = createCSVData(images, tags, title, category);
       await uploadCsv(csvData);
     } finally {
       setIsLoading(false);
@@ -67,7 +68,12 @@ const SubmitButton: FunctionComponent<TagsButtonProps> = ({
       >
         {'Upload tags and submit images to stock'}
       </button>
-      {isLoading && <Loader />}
+      {isLoading && (
+        <>
+          <Loader />
+          <CancelButton onClick={() => cancelOperations(['upload_csv'])} />
+        </>
+      )}
       {!isLoading && !isReadyToSubmit && (
         <button
           className="icon"

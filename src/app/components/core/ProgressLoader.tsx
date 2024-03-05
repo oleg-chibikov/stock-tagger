@@ -3,7 +3,7 @@ import { Operation } from '@dataTransferTypes/operation';
 import { OperationStatus } from '@dataTransferTypes/operationStatus';
 import clsx from 'clsx';
 import { FunctionComponent } from 'react';
-import { FaTimes } from 'react-icons/fa';
+import { CancelButton } from './CancelButton';
 import { Styleable } from './Styleable';
 
 interface ProgressLoadersProps extends Styleable {
@@ -71,9 +71,7 @@ const ProgressLoader: FunctionComponent<ProgressLoadersProps> = ({
           );
         })}
       </div>
-      <button title="Cancel" className="cancel" onClick={handleCancel}>
-        <FaTimes />
-      </button>
+      <CancelButton onClick={handleCancel} />
     </>
   );
 };

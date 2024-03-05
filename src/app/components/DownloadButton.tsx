@@ -16,7 +16,7 @@ const DownloadTagsButton: FunctionComponent<TagsButtonProps> = ({
   category,
 }) => {
   const handleDownloadTags = async () => {
-    await downloadCSV(images, tags, title, true, category);
+    await downloadCSV(images, tags, title, category);
     window
       ?.open('https://contributor.stock.adobe.com/en/uploads', '_blank')
       ?.focus();
@@ -25,5 +25,5 @@ const DownloadTagsButton: FunctionComponent<TagsButtonProps> = ({
   return <button onClick={handleDownloadTags}>Download tags</button>;
 };
 
-export type { TagsButtonProps };
 export { DownloadTagsButton };
+export type { TagsButtonProps };

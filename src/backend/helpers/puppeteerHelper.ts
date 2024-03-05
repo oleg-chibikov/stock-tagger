@@ -1,15 +1,14 @@
 import { ElementHandle, Page } from 'puppeteer';
 
 const clickByXPath = async (page: Page, selector: string) => {
-  await page.waitForXPath(selector);
-  const elements = await page.$x(selector);
+  console.log('xpath///' + selector);
+  const element = await page.waitForSelector('xpath///' + selector);
 
-  if (elements.length === 0) {
+  if (!element) {
     throw new Error(`Element not found for selector: ${selector}`);
   }
 
-  const [uploadCsvLink] = elements;
-  await (uploadCsvLink as ElementHandle<Element>).click();
+  await element.evaluate((b) => (b as any).click());
 };
 
 const clickBySelector = async (page: Page, selector: string) => {

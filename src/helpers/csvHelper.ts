@@ -1,22 +1,19 @@
 import { ImageWithData } from './imageHelper';
 
-const generativeAiTitlePostfix = '. Generative AI';
 const maxTitleLength = 200;
-const maxTitleAiLength = maxTitleLength - generativeAiTitlePostfix.length;
 
 const createCSVData = (
   images: ImageWithData[],
   tags: string[],
   title: string,
-  isAi: boolean,
   category?: number
 ): string => {
   const csvSplitter = ',';
   const rows = images.map((image) => {
     return {
-      Filename: `"${image.name}"`,
-      Title: `"${title}${isAi ? generativeAiTitlePostfix : ''}"`,
-      Keywords: `"${tags.join(csvSplitter)}"`,
+      Filename: image.name,
+      Title: title.replace(',', ';'),
+      Keywords: `"${tags.map((x) => x.replace(',', ';')).join(csvSplitter)}"`,
       Category: category?.toString(),
       Releases: '',
     };
@@ -36,10 +33,9 @@ const downloadCSV = (
   images: ImageWithData[],
   tags: string[],
   title: string,
-  isAi: boolean,
   category?: number
 ) => {
-  const csvData = createCSVData(images, tags, title, isAi, category);
+  const csvData = createCSVData(images, tags, title, category);
 
   // Create a Blob from the CSV data
   const blob = new Blob([csvData], { type: 'text/csv' });
@@ -54,4 +50,4 @@ const downloadCSV = (
   document.body.removeChild(a);
 };
 
-export { maxTitleAiLength, createCSVData, downloadCSV };
+export { createCSVData, downloadCSV, maxTitleLength };

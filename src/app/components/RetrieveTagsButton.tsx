@@ -8,8 +8,8 @@ import { useAppSelector } from '@store/store';
 import { setTags } from '@store/tagSlice';
 import clsx from 'clsx';
 import { useMemo, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
+import { CancelButton } from './core/CancelButton';
 
 interface Props extends Styleable {
   onCaptionRetrieved: (caption: CaptionEvent) => void;
@@ -44,7 +44,7 @@ export function RetrieveTagsButton({
       const tags = await uploadImageAndGetTags(image);
       retrievedTags.push(tags);
     }
-    const uniqueTags = getUniqueTags(retrievedTags, tags, true);
+    const uniqueTags = getUniqueTags(retrievedTags, tags);
     dispatch(setTags(uniqueTags));
   };
 
@@ -71,13 +71,7 @@ export function RetrieveTagsButton({
       {isLoading && (
         <>
           <Loader />
-          <button
-            className="icon cancel"
-            title="Cancel"
-            onClick={() => cancelOperations(['caption'])}
-          >
-            <FaTimes />
-          </button>
+          <CancelButton onClick={() => cancelOperations(['caption'])} />
         </>
       )}
     </div>

@@ -1,4 +1,4 @@
-import { maxTitleAiLength } from '@appHelpers/csvHelper';
+import { maxTitleLength } from '@appHelpers/csvHelper';
 import { ClearTagsButton } from '@components/ClearButton';
 import {
   DownloadTagsButton,
@@ -48,7 +48,7 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className }) => {
 
   const onCaptionRetrieved = (captionEvent: CaptionEvent) => {
     if (!title.length && captionEvent.isFromFileMetadata) {
-      setTitle(captionEvent.caption.substring(0, maxTitleAiLength));
+      setTitle(captionEvent.caption.substring(0, maxTitleLength));
     }
     // duplicate captions are not allowed
     if (captions.map((x) => x.value).indexOf(captionEvent.caption) < 0) {
@@ -78,10 +78,10 @@ const SidePanel: FunctionComponent<SidePanelProps> = ({ className }) => {
         label="Title"
         value={title}
         onSelect={(value) =>
-          setTitle((value as string).substring(0, maxTitleAiLength))
+          setTitle((value as string).substring(0, maxTitleLength))
         }
         items={captions}
-        maxLength={maxTitleAiLength}
+        maxLength={maxTitleLength}
         className="z-20"
         isLoading={areCaptionsLoading}
         rows={3}

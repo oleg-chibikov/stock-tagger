@@ -7,6 +7,7 @@ import zoomImageReducer from './zoomImageSlice';
 
 enableMapSet();
 const store = configureStore({
+  devTools: true,
   reducer: {
     image: imageReducer,
     tag: tagReducer,
@@ -19,5 +20,5 @@ const store = configureStore({
 type RootState = ReturnType<typeof store.getState>;
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-export type { RootState };
 export { store, useAppSelector };
+export type { RootState };

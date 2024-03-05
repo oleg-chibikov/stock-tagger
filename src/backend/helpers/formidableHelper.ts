@@ -2,6 +2,23 @@ import { ImageFileData } from '@dataTransferTypes/imageFileData';
 import { Fields, File, Files, IncomingForm } from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 
+const processRequest = async (
+  res: NextApiResponse,
+  process: () => Promise<void>
+) => {
+  console.log('Processing request...');
+
+  try {
+    await process();
+    console.log('Successfully finished request');
+    res.status(200).end();
+  } catch (error: any) {
+    const e = 'Cannot process request: ' + error;
+    console.error(e);
+    res.status(500).send(e);
+  }
+};
+
 const processRequestWithFiles = (
   req: NextApiRequest,
   res: NextApiResponse,
@@ -18,14 +35,9 @@ const processRequestWithFiles = (
       res.status(500).send('Request form has errors: ' + err);
       return;
     }
-    try {
+    await processRequest(res, async () => {
       await process(fields, files);
-      res.status(200).end();
-    } catch (error: any) {
-      const e = 'Cannot process request: ' + error;
-      console.error(e);
-      res.status(500).send(e);
-    }
+    });
   });
 };
 
@@ -33,7 +45,7 @@ const getFilesFromRequest = (files: Files): File[] => {
   if (!files) {
     return [];
   }
-  return Object.values(files).flatMap((x) => x);
+  return Object.values(files).flatMap((x) => x) as File[];
 };
 
 const convertToImageFileData = (file: File): ImageFileData => {
@@ -43,4 +55,9 @@ const convertToImageFileData = (file: File): ImageFileData => {
   };
 };
 
-export { convertToImageFileData, getFilesFromRequest, processRequestWithFiles };
+export {
+  convertToImageFileData,
+  getFilesFromRequest,
+  processRequest,
+  processRequestWithFiles,
+};

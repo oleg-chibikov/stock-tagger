@@ -1,6 +1,7 @@
 import { uploadToSftp, upscale } from '@apiClient/backendApiClient';
 import { UploadToStockButton } from '@components/UploadButton';
 import { UpscaleButton } from '@components/UpscaleButton';
+import { DraggableArea } from '@components/core/DraggableArea';
 import { HelpIcon } from '@components/core/HelpIcon';
 import { Styleable } from '@components/core/Styleable';
 import { ImageFileData } from '@dataTransferTypes/imageFileData';
@@ -174,7 +175,8 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
     );
 
   return (
-    <div
+    <DraggableArea
+      onDropFiles={processUploadedFiles}
       className={clsx(
         'w-full h-full p-4 bg-gray-800 gap-4 flex flex-col z-40',
         className
@@ -220,7 +222,7 @@ const MainSection: FunctionComponent<MainSectionProps> = ({
           </>
         )}
       </>
-    </div>
+    </DraggableArea>
   );
 };
 
